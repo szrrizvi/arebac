@@ -1,1 +1,9 @@
 /target/
+/slashdotNeo4j/
+/bin/
+.classpath
+.DS_Store
+/.settings/
+.project
+/*files/
+out*
