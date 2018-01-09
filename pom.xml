@@ -8,18 +8,34 @@
   <packaging>jar</packaging>
 
   <name>arebac</name>
-  <url>http://maven.apache.org</url>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <url>http://pages.cpsc.ucalgary.ca/~szrrizvi/projectAReBAC/index.html</url>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
+  	<dependency>
+    	<groupId>org.neo4j</groupId>
+    	<artifactId>neo4j</artifactId>
+    	<version>3.2.1</version>
+		</dependency>  
   </dependencies>
+
+  <build>
+  	<plugins>
+		<plugin>
+			<artifactId>maven-compiler-plugin</artifactId>
+  			 <version>3.5.1</version>
+   			<configuration>
+    				<source>1.7</source>
+    				<target>1.7</target>
+   			</configuration>
+		</plugin>
+		<plugin>
+   			<groupId>org.codehaus.mojo</groupId>
+   				<artifactId>exec-maven-plugin</artifactId>
+   				<version>1.5.0</version>
+   				<configuration>
+    					<mainClass>ca.ucalgary.ispia.graphpatterns.Driver</mainClass>
+   				</configuration>
+  		</plugin>
+	</plugins>
+  </build>
 </project>
