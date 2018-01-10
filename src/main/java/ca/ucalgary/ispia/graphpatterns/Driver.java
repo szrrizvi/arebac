@@ -19,7 +19,7 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args){	
-
+		//Test!
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 		Random rand = new Random(3706715);
