@@ -216,7 +216,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * @param candidates The current state of candidates.
 	 * @return
 	 */
-	private ReturnStruct check_rec(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates){
+	private Set<MyNode> check_rec(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates){
 
 		//If the search has been killed, return false
 		if (killed){
@@ -244,7 +244,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			if (!queryResults.contains(result)){
 				queryResults.add(result);
 			}
-			return new ReturnStructImpl(true, new HashSet<MyNode>(gph.getResultSchema()));
+			return new HashSet<MyNode>(gph.getResultSchema());
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
@@ -286,17 +286,21 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			if (validVertex){
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
-				ReturnStruct rs = check_rec(assnClone, candsClone);
+				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone);
 
 				if (killed){
 					return null;
 				}
-
-				if (rs != null && 
-						rs.isJumpingForJoy() && 
-						!rs.getJumpVariables().contains(nextNode)){
-					return rs;
+				
+				if (jumpNodes != null && !jumpNodes.contains(nextNode)){
+					return jumpNodes;
 				}
+
+				//if (rs != null && 
+				//		rs.isJumpingForJoy() && 
+				//		!rs.getJumpVariables().contains(nextNode)){
+				//	return rs;
+				//}
 			}
 		}
 
