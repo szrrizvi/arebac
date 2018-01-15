@@ -47,7 +47,8 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	private final NeighbourhoodAccess neighbourhoodAccess;
 	private final VariableOrdering variableOrdering;
 	private final AltStart altStart;
-	
+
+
 	private boolean killed;							//The kill flag.
 
 	/**
@@ -65,11 +66,12 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		queryResults = new ArrayList<Map<MyNode, Node>>();
 		queryCount = 0;
 		killed = false;
-		
+
 		this.consEval = new ConstraintsChecker(gph, graphDb);
 		this.neighbourhoodAccess = new DBAccess (graphDb, consEval);
 		this.variableOrdering = new LeastCandidates(gp);
 		this.altStart = new AttrBasedStart(graphDb, consEval);
+
 	}
 
 	/**
@@ -82,7 +84,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	//--------------------------//
 	// PUBLICLY EXPOSED METHODS
 	//--------------------------//
-	
+
 	/**
 	 * Runs the query evaluation algorithm.
 	 * @return The query result
@@ -119,7 +121,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 					//return null is no db node found with the given id
 					return null;
 				}
-				
+
 				if (consEval.checkAttrs(node, vertex)){
 					//If the db node satisfies all attribute requirements, then add the mapping to the
 					//assignments map
@@ -137,7 +139,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	//--------------------------//
 	// INIT
 	//--------------------------//
-	
+
 	/**
 	 * Checks if the given graph pattern holder exists in the associated database.
 	 * @param assignments 
@@ -186,7 +188,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 				return null;
 			}
 		}
-		
+
 		//If the canadidates map is still empty, because there we no fixed nodes, then
 		//populate the candidates map based on the attributes.
 		if (candidates.isEmpty()){
@@ -194,13 +196,13 @@ public class GPCheckerOpt implements GPChecker, Killable{
 				return null;
 			}
 		}
-		
+
 		//If the candidates map is still empty, even after populating it through attribute
 		//requirements, then return null as we have no starting point.
 		if (candidates.isEmpty()){
 			return null;
 		}
-		
+
 		//Start the search for the remaining nodes
 		check_rec(assignments, candidates);
 		return queryResults;
@@ -209,23 +211,25 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	//--------------------------//
 	// RECURSIVE STEP
 	//--------------------------//
-	
+
 	/**
 	 * The recursive step of the GP-Eval algorithm.
 	 * @param assignments The current state of assignments.
 	 * @param candidates The current state of candidates.
+	 * @param confOut Outgoing conflicts. Var v filters/populates the associated list.
+	 * @param confIn Incoming conflicts. Var v is filtered/populated by the associated list. 
 	 * @return
 	 */
-	private Set<MyNode> check_rec(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates){
+
+	private Set<MyNode> check_rec(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, Map<MyNode, Set<MyNode>> confOut, Map<MyNode, Set<MyNode>> confIn){
 
 		//If the search has been killed, return false
 		if (killed){
 			return null;
 		}
 
-
 		// BASE CASE
-		
+
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
 
@@ -248,11 +252,11 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
-		
+
 		//Pick the next node to assign such that it is populated but not yet assigned 
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
 		consEval.mexFilter(nextNode, candidates.get(nextNode), assignments);
-		
+
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
@@ -279,7 +283,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			//Update the clones based on current assignment
 			candsClone.remove(nextNode);
 			assnClone.put(nextNode, vertex);
-			
+
 			//Perform forward checking
 			boolean validVertex = populateFilter(assnClone, candsClone, nextNode);
 
@@ -291,7 +295,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 				if (killed){
 					return null;
 				}
-				
+
 				if (jumpNodes != null && !jumpNodes.contains(nextNode)){
 					return jumpNodes;
 				}
@@ -306,18 +310,18 @@ public class GPCheckerOpt implements GPChecker, Killable{
 
 		return null;
 	}
-	
+
 	//--------------------------//
 	// FORWARD CHECKING
 	//--------------------------//
-	
+
 	/**
 	 * Populates the candidates map for assignments with possible vertices in the database
 	 * @param assignments
 	 * @param candidates
 	 * @param node
 	 */
-	private boolean populateFilter(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, MyNode node){
+	private boolean populateFilter(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, MyNode node, Map<MyNode, Set<MyNode>> confOut, Map<MyNode, Set<MyNode>> confIn){
 
 		Node vertex = assignments.get(node);
 		//Get all of the relationships from GP that contain the given node.
@@ -335,10 +339,17 @@ public class GPCheckerOpt implements GPChecker, Killable{
 				if (candidates.containsKey(otherNode)){
 					//If the candidates set exists, then filter it
 					Set<Node> temp = candidates.get(otherNode);
+					
+					if (!neighbours.containsAll(temp)){
+						addConflict(node, otherNode, confOut, confIn);
+					}
+					
 					temp.retainAll(neighbours);				
 				} else {
 					//Else populate it
 					candidates.put(otherNode, neighbours);
+					
+					addConflict(node, otherNode, confOut, confIn);
 				}
 
 				//If the updated candidates set is empty, then return false 
@@ -351,11 +362,11 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		return true;
 	}
 
-	
+
 	//--------------------------//
 	// HELPER METHODS
 	//--------------------------//	
-	
+
 	/**
 	 * This method checks the direct relationships between the fixed nodes.
 	 * @param gp
@@ -406,7 +417,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		//If reached here, the all of the relationships passed, thus return true.
 		return true;
 	}
-	
+
 	//-------------------------//
 	// KILLABLE FEATURES	
 	//-------------------------//
@@ -415,5 +426,23 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 */
 	public void kill(){
 		this.killed = true;
+	}
+
+	private void addConflict(MyNode src, MyNode tgt, Map<MyNode, Set<MyNode>> confOut, Map<MyNode, Set<MyNode>> confIn){
+		if (confOut.containsKey(src)){
+			confOut.get(src).add(tgt);
+		} else {
+			Set<MyNode> confList = new HashSet<MyNode>();
+			confList.add(tgt);
+			confOut.put(src, confList);
+		}
+
+		if (confIn.containsKey(tgt)){
+			confIn.get(tgt).add(src);
+		} else {
+			Set<MyNode> confList = new HashSet<MyNode>();
+			confList.add(src);
+			confIn.put(tgt, confList);
+		}
 	}
 }
