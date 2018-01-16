@@ -182,9 +182,13 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			return null;
 		}
 
+		//Initialize the conflit maps
+		Map<MyNode, Set<MyNode>> confOut = new HashMap<MyNode, Set<MyNode>>();
+		Map<MyNode, Set<MyNode>> confIn = new HashMap<MyNode, Set<MyNode>>();
+		
 		//Populate and filter the immediate neighbours of the fixed nodes
 		for (MyNode key : assignments.keySet()){
-			if (!populateFilter(assignments, candidates, key)){
+			if (!populateFilter(assignments, candidates, key, confOut, confIn)){
 				return null;
 			}
 		}
@@ -204,7 +208,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		}
 
 		//Start the search for the remaining nodes
-		check_rec(assignments, candidates);
+		check_rec(assignments, candidates, confOut, confIn);
 		return queryResults;
 	}
 
@@ -257,6 +261,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
 		consEval.mexFilter(nextNode, candidates.get(nextNode), assignments);
 
+		//Dead-ednd flag
+		boolean deadEnd = true;
+		
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
@@ -285,12 +292,15 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			assnClone.put(nextNode, vertex);
 
 			//Perform forward checking
-			boolean validVertex = populateFilter(assnClone, candsClone, nextNode);
+			boolean validVertex = populateFilter(assnClone, candsClone, nextNode, confOut, confIn);
 
 			if (validVertex){
+				//Update deadEnd flag
+				deadEnd = true;
+		
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
-				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone);
+				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confOut, confIn);
 
 				if (killed){
 					return null;
@@ -308,7 +318,11 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			}
 		}
 
-		return null;
+		if (deadEnd){
+			return null;
+		} else {		
+			return null;
+		}
 	}
 
 	//--------------------------//
@@ -340,8 +354,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 					//If the candidates set exists, then filter it
 					Set<Node> temp = candidates.get(otherNode);
 					
+					//If there is filtering, then add the incoming conflict.
 					if (!neighbours.containsAll(temp)){
-						addConflict(node, otherNode, confOut, confIn);
+						addConflictIn(node, otherNode, confIn);
 					}
 					
 					temp.retainAll(neighbours);				
@@ -349,11 +364,15 @@ public class GPCheckerOpt implements GPChecker, Killable{
 					//Else populate it
 					candidates.put(otherNode, neighbours);
 					
-					addConflict(node, otherNode, confOut, confIn);
+					//If there is populating, then add the incoming conflict.
+					addConflictIn(node, otherNode, confIn);
 				}
 
-				//If the updated candidates set is empty, then return false 
+				//If the updated candidates set is empty, then add the outgoing conflict and return false 
 				if (candidates.get(otherNode).isEmpty()){
+					
+					addConflictOut(node, otherNode, confOut);
+					
 					return false;
 				}
 			}
@@ -428,7 +447,13 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		this.killed = true;
 	}
 
-	private void addConflict(MyNode src, MyNode tgt, Map<MyNode, Set<MyNode>> confOut, Map<MyNode, Set<MyNode>> confIn){
+
+	//-------------------------//
+	// CONFLICT-DIRECTED BACKJUMPING
+	//-------------------------//
+
+	
+	private void addConflictOut(MyNode src, MyNode tgt, Map<MyNode, Set<MyNode>> confOut){
 		if (confOut.containsKey(src)){
 			confOut.get(src).add(tgt);
 		} else {
@@ -436,13 +461,34 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			confList.add(tgt);
 			confOut.put(src, confList);
 		}
-
+	}
+	
+	private void addConflictIn(MyNode src, MyNode tgt, Map<MyNode, Set<MyNode>> confIn){
+		
 		if (confIn.containsKey(tgt)){
 			confIn.get(tgt).add(src);
 		} else {
 			Set<MyNode> confList = new HashSet<MyNode>();
 			confList.add(src);
 			confIn.put(tgt, confList);
+		}
+	}
+
+	
+	private Set<MyNode> deadEndJump(MyNode src, Map<MyNode, Set<MyNode>> confOut, Map<MyNode, Set<MyNode>> confIn){
+		Set<MyNode> jumpVars = new HashSet<MyNode>();
+		if (confOut.containsKey(src)){
+			jumpVars.addAll(confOut.get(src));
+		}
+		
+		if (confIn.containsKey(src)){
+			jumpVars.addAll(confIn.get(src));
+		}
+		
+		if (jumpVars.isEmpty()){
+			return null;
+		} else {
+			return jumpVars;
 		}
 	}
 }
