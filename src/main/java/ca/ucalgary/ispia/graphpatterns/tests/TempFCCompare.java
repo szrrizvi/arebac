@@ -67,8 +67,8 @@ public class TempFCCompare {
 			GPHolder combined = test.combined;
 
 
-			//GPCheckerOpt gpFC = new GPCheckerOpt(graphDb, combined);
-			GPCheckerFC gpFC = new GPCheckerFC(graphDb, combined);
+			GPCheckerOpt gpFC = new GPCheckerOpt(graphDb, combined);
+			//GPCheckerFC gpFC = new GPCheckerFC(graphDb, combined);
 			List<Map<MyNode, Node>> result = gpFC.check();
 
 			if (result != null){
