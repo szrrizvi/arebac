@@ -28,7 +28,7 @@ public class Driver {
 				
 		try {
 			TempFCCompare tfcc = new TempFCCompare(graphDb);
-			tfcc.runTests(7, "0720files");
+			tfcc.runTests(7, "0724files");
 			
 			//etr.warmup(100);
 			//etr.writeDiffTests(rand, "0724files");

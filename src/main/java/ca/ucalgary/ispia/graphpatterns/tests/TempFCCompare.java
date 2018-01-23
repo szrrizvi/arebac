@@ -13,6 +13,7 @@ import ca.ucalgary.ispia.graphpatterns.gpchecker.GPCheckerFC;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerOpt;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
+import ca.ucalgary.ispia.graphpatterns.util.Translator;
 
 public class TempFCCompare {
 	private GraphDatabaseService graphDb;
@@ -39,6 +40,7 @@ public class TempFCCompare {
 			List<TripleGPHolder> tests = (List<TripleGPHolder>) ois.readObject();
 			ois.close();
 			//Execute the tests
+			System.out.println("Profile " + (i+1));
 			executeTests(tests);
 		}
 	}
@@ -74,7 +76,6 @@ public class TempFCCompare {
 			if (result != null){
 				System.out.println(result.size());
 			}
-
 		}
 	}
 
