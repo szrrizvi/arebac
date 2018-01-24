@@ -7,6 +7,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import ca.ucalgary.ispia.graphpatterns.tests.EvalTestRunner;
+import ca.ucalgary.ispia.graphpatterns.tests.Neo4jQueries;
 import ca.ucalgary.ispia.graphpatterns.tests.TempFCCompare;
 /**
  * The driver.
@@ -27,8 +28,23 @@ public class Driver {
 		EvalTestRunner etr = new EvalTestRunner(graphDb);
 				
 		try {
+			Neo4jQueries njq = new Neo4jQueries(graphDb);
+			njq.setDebug(true);
+			String q = "MATCH (Cd:PERSON) -[rela : RelD]->(Cb:PERSON) " +  
+							"MATCH (Ce:PERSON) -[relb : RelG]->(Cb:PERSON) " +
+							"MATCH (Ca:PERSON) -[relc : RelD]->(Cb:PERSON) " +
+							"MATCH (Cb:PERSON) -[reld : RelB]->(Cc:PERSON) " +
+							"MATCH (Cb:PERSON) -[rele : RelE]->(Cd:PERSON) " +
+							"MATCH (Cb:PERSON) -[relf : RelE]->(Ce:PERSON) " +
+							"WHERE Cb.`full or part time employment stat`=\"Children or Armed Forces\" AND Ce.`id`=3931 AND Ca.`major occupation code`=\"Not in universe\" AND Ca.`reason for unemployment`=\"Not in universe\" AND Ca.`own business or self employed`=0 AND Ca.`major industry code`=\"Not in universe or children\" AND relb.`weight`=7 AND relf.`weight`=4 AND Ca<>Cd " + 
+							"RETURN distinct Ca";
+			String q1 = "MATCH (n) WHERE n.id=32706 RETURN n";
+							
+			//njq.runQuery(q1);
+			
 			TempFCCompare tfcc = new TempFCCompare(graphDb);
-			tfcc.runTests(7, "0724files");
+			//tfcc.runTests(7, "0724files");
+			tfcc.runSpecificTest(682, "0724files/tests0");
 			
 			//etr.warmup(100);
 			//etr.writeDiffTests(rand, "0724files");

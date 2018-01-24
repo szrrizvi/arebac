@@ -8,12 +8,11 @@ import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 
-import ca.ucalgary.ispia.graphpatterns.gpchecker.GPCheckerFC;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerOpt;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
-import ca.ucalgary.ispia.graphpatterns.util.Translator;
 
 public class TempFCCompare {
 	private GraphDatabaseService graphDb;
@@ -43,6 +42,16 @@ public class TempFCCompare {
 			System.out.println("Profile " + (i+1));
 			executeTests(tests);
 		}
+	}
+	
+	public void runSpecificTest(int testNum, String fileName) throws Exception{
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName+".ser"));
+		List<TripleGPHolder> tests = (List<TripleGPHolder>) ois.readObject();
+		ois.close();
+		
+		TripleGPHolder test = tests.get(testNum);
+		executeTests(test);
+		
 	}
 
 	/**
@@ -74,7 +83,27 @@ public class TempFCCompare {
 			List<Map<MyNode, Node>> result = gpFC.check();
 
 			if (result != null){
-				System.out.println(result.size());
+				
+				for (Map<MyNode, Node> res : result){
+					for (MyNode key : res.keySet()){
+						System.out.println("Ca: " + res.get(key));
+						
+						try(Transaction tx = graphDb.beginTx()){
+							Node n = res.get(key);
+							
+							Map<String, Object> prop = n.getAllProperties();
+							for (String p : prop.keySet()){
+								System.out.println(p + " " + prop.get(p));
+							}
+							
+							tx.success();							
+						}
+						
+					}
+					System.out.println();
+				}
+				
+				//System.out.println(result.size());
 			}
 		}
 	}

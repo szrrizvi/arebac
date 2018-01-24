@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionTerminatedException;
@@ -55,15 +56,21 @@ public class Neo4jQueries {
 			start = System.nanoTime();
 			Result result = graphDb.execute(query);
 
-			if(result.hasNext()){
+			while(result.hasNext()){
 				Map<String, Object> row = result.next();
 
 				if (debug){
 					System.out.println("true");
-					/*for (String str : row.keySet()){
+					for (String str : row.keySet()){
 						System.out.print(str + ": " + row.get(str) + ", ");
+						
+						Node n = (Node) row.get(str);
+						Map<String, Object> prop = n.getAllProperties();
+						for (String p : prop.keySet()){
+							System.out.println(p + " " + prop.get(p));
+						}
 					}
-					System.out.println();*/
+					System.out.println();
 				}
 			}
 			end = System.nanoTime();
