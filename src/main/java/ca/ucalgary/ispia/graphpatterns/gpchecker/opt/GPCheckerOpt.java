@@ -259,19 +259,21 @@ public class GPCheckerOpt implements GPChecker, Killable{
 
 		//Pick the next node to assign such that it is populated but not yet assigned 
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
-		consEval.mexFilter(nextNode, candidates.get(nextNode), assignments);
+		consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
 
 		//Dead-ednd flag
 		boolean deadEnd = true;
-
+		
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
+		Set<MyNode> extra = new HashSet<MyNode>();
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(Node vertex : candidates.get(nextNode)){
-
+			
+			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<Node>> candsClone = new HashMap<MyNode, Set<Node>>();
 			for (MyNode key : candidates.keySet()){
@@ -309,10 +311,10 @@ public class GPCheckerOpt implements GPChecker, Killable{
 
 			//Perform forward checking
 			boolean validVertex = populateFilter(assnClone, candsClone, nextNode, confOut, confInClone);
-
+			
 			if (validVertex){
 				//Update deadEnd flag
-				deadEnd = true;
+				deadEnd = false;
 
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
@@ -322,8 +324,13 @@ public class GPCheckerOpt implements GPChecker, Killable{
 					return null;
 				}
 
-				if (jumpNodes != null && !jumpNodes.isEmpty() && !jumpNodes.contains(nextNode)){
-					return jumpNodes;
+				if (jumpNodes != null && !jumpNodes.isEmpty()){
+					
+					if (!jumpNodes.contains(nextNode)){
+						return jumpNodes;
+					} else {
+						extra.addAll(jumpNodes);
+					}
 				}
 
 				//if (rs != null && 
@@ -337,7 +344,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		if (deadEnd){
 			return deadEndJump(nextNode, confOut, confIn);
 		} else {
-			return successJump(nextNode, confOut, confIn, assignments.keySet());
+			extra.addAll(successJump(nextNode, confOut, confIn, assignments.keySet()));
+			
+			return extra;
 		}
 	}
 

@@ -1,6 +1,7 @@
 package ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,10 +47,14 @@ public class ConstraintsChecker implements ConstraintsEvaluator{
 	 * @param node The assignment for the target node
 	 * @param candidates The list of candidates for the currently populated nodes
 	 */
-	public void mexFilter(MyNode variable, Set<Node> candidates, Map<MyNode, Node> assignments){
+	public void mexFilter(MyNode variable, Set<Node> candidates, Map<MyNode, Node> assignments, Map<MyNode, Set<MyNode>> confIn){
 		//Get the mutual exclusion constraints containing the variable
 		List<Pair<MyNode, MyNode>> mexList = gph.getMexList(variable); 
 
+		if (!confIn.containsKey(variable)){
+			confIn.put(variable, new HashSet<MyNode>());
+		}
+		
 
 		for (Pair<MyNode, MyNode> mex : mexList){
 			//For the constraint, get the other node
@@ -64,6 +69,8 @@ public class ConstraintsChecker implements ConstraintsEvaluator{
 			if (assignments.containsKey(other)){
 				//Remove 'node' from its candidates set 
 				candidates.remove(assignments.get(other));
+				
+				confIn.get(variable).add(other);
 			}
 		}		
 	}

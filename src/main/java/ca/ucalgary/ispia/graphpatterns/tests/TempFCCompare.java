@@ -10,9 +10,11 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
+import ca.ucalgary.ispia.graphpatterns.gpchecker.GPCheckerFC;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerOpt;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
+import ca.ucalgary.ispia.graphpatterns.util.Translator;
 
 public class TempFCCompare {
 	private GraphDatabaseService graphDb;
@@ -78,17 +80,19 @@ public class TempFCCompare {
 			GPHolder combined = test.combined;
 
 
+			//System.out.println(Translator.translateToCypher(combined));
+			
 			GPCheckerOpt gpFC = new GPCheckerOpt(graphDb, combined);
 			//GPCheckerFC gpFC = new GPCheckerFC(graphDb, combined);
 			List<Map<MyNode, Node>> result = gpFC.check();
 
 			if (result != null){
 				
-				for (Map<MyNode, Node> res : result){
+				/*for (Map<MyNode, Node> res : result){
 					for (MyNode key : res.keySet()){
-						System.out.println("Ca: " + res.get(key));
+						//System.out.println(key.getId() + ": " + res.get(key));
 						
-						try(Transaction tx = graphDb.beginTx()){
+						(try(Transaction tx = graphDb.beginTx()){
 							Node n = res.get(key);
 							
 							Map<String, Object> prop = n.getAllProperties();
@@ -101,9 +105,9 @@ public class TempFCCompare {
 						
 					}
 					System.out.println();
-				}
+				}*/
 				
-				//System.out.println(result.size());
+				System.out.println(result.size());
 			}
 		}
 	}

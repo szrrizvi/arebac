@@ -22,7 +22,7 @@ public interface ConstraintsEvaluator {
 	 * @param gph The GPHolder
 	 * @param graphDb The GraphDatabaseService
 	 */
-	public abstract void mexFilter(MyNode variable, Set<Node> candidates, Map<MyNode, Node> assignments);
+	public abstract void mexFilter(MyNode variable, Set<Node> candidates, Map<MyNode, Node> assignments, Map<MyNode, Set<MyNode>> confIn);
 	
 	/**
 	 * Filters the candidates set based on the mutual exclusion constraints and current assignment

@@ -40,11 +40,11 @@ public class Driver {
 							"RETURN distinct Ca";
 			String q1 = "MATCH (n) WHERE n.id=32706 RETURN n";
 							
-			//njq.runQuery(q1);
+			//njq.runQuery(q);
 			
 			TempFCCompare tfcc = new TempFCCompare(graphDb);
-			//tfcc.runTests(7, "0724files");
-			tfcc.runSpecificTest(682, "0724files/tests0");
+			tfcc.runTests(7, "0724files");
+			//tfcc.runSpecificTest(872, "0724files/tests6");
 			
 			//etr.warmup(100);
 			//etr.writeDiffTests(rand, "0724files");
