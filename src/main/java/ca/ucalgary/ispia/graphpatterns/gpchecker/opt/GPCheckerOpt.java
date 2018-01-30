@@ -477,6 +477,12 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	// CONFLICT-DIRECTED BACKJUMPING
 	//-------------------------//
 
+	/**
+	 * Adds an incoming conflict to the confIn map. Also maintains the influence chains. 
+	 * @param src The source node that filtered the target node's candidates set.
+	 * @param tgt The target node whose candidates set is filtered.
+	 * @param confIn The map of incoming conflicts.
+	 */
 	private void addConflictIn(MyNode src, MyNode tgt, Map<MyNode, Set<MyNode>> confIn){
 
 		if (confIn.containsKey(tgt)){
@@ -528,6 +534,14 @@ public class GPCheckerOpt implements GPChecker, Killable{
 
 	}
 
+	/**
+	 * Computes the set of nodes to jump back to in case the current node has at least one assignment that can be extended. 
+	 * @param src The current node.
+	 * @param confOut The outgoing conflicts set.
+	 * @param confIn The incoming conflicts map.
+	 * @param assignedNodes The current assignments map.
+	 * @return The set of nodes to jump back to.
+	 */
 	private Set<MyNode> successJump(MyNode src, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn, Set<MyNode> assignedNodes){
 		Set<MyNode> jumpVars = new HashSet<MyNode>();
 
