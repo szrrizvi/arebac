@@ -43,8 +43,8 @@ public class Driver {
 			//njq.runQuery(q);
 			
 			TempFCCompare tfcc = new TempFCCompare(graphDb);
-			tfcc.runTests(7, "0724files");
-			//tfcc.runSpecificTest(872, "0724files/tests6");
+			//tfcc.runTests(7, "0724files");
+			tfcc.runSpecificTest(202, "0724files/tests2");
 			
 			//etr.warmup(100);
 			//etr.writeDiffTests(rand, "0724files");

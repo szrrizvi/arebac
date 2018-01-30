@@ -80,13 +80,17 @@ public class TempFCCompare {
 			GPHolder combined = test.combined;
 
 
-			//System.out.println(Translator.translateToCypher(combined));
+			System.out.println(Translator.translateToCypher(combined));
 			
 			GPCheckerOpt gpFC = new GPCheckerOpt(graphDb, combined);
 			//GPCheckerFC gpFC = new GPCheckerFC(graphDb, combined);
-			List<Map<MyNode, Node>> result = gpFC.check();
+			
+			long start = System.nanoTime();
+			//List<Map<MyNode, Node>> result = gpFC.check();
+			long end = System.nanoTime();
+			System.out.println(end-start);
 
-			if (result != null){
+			//if (result != null){
 				
 				/*for (Map<MyNode, Node> res : result){
 					for (MyNode key : res.keySet()){
@@ -107,8 +111,8 @@ public class TempFCCompare {
 					System.out.println();
 				}*/
 				
-				System.out.println(result.size());
-			}
+				//System.out.println(result.size());
+			//}
 		}
 	}
 
