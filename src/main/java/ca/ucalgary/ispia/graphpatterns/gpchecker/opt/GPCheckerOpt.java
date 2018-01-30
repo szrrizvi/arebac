@@ -266,7 +266,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
-		Set<MyNode> extra = new HashSet<MyNode>();
+		Set<MyNode> jumpStack = new HashSet<MyNode>();
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
@@ -329,7 +329,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 					if (!jumpNodes.contains(nextNode)){
 						return jumpNodes;
 					} else {
-						extra.addAll(jumpNodes);
+						jumpStack.addAll(jumpNodes);
 					}
 				}
 
@@ -344,9 +344,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		if (deadEnd){
 			return deadEndJump(nextNode, confOut, confIn);
 		} else {
-			extra.addAll(successJump(nextNode, confOut, confIn, assignments.keySet()));
+			jumpStack.addAll(successJump(nextNode, confOut, confIn, assignments.keySet()));
 			
-			return extra;
+			return jumpStack;
 		}
 	}
 
