@@ -86,7 +86,7 @@ public class TempFCCompare {
 			//GPCheckerFC gpFC = new GPCheckerFC(graphDb, combined);
 			
 			long start = System.nanoTime();
-			//List<Map<MyNode, Node>> result = gpFC.check();
+			List<Map<MyNode, Node>> result = gpFC.check();
 			long end = System.nanoTime();
 			System.out.println(end-start);
 

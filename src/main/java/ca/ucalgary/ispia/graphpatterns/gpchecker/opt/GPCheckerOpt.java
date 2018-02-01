@@ -267,12 +267,20 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Set<MyNode> jumpStack = new HashSet<MyNode>();
+		
+		System.out.println("CANDIDATES");
+		for (MyNode key : candidates.keySet()){
+			System.out.print(key.getId() + ": ");
+			for (Node n : candidates.get(key)){
+				System.out.print(n.getId() + ", ");
+			}
+			System.out.println();
+		}
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(Node vertex : candidates.get(nextNode)){
-			
 			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<Node>> candsClone = new HashMap<MyNode, Set<Node>>();
@@ -359,6 +367,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * @param assignments
 	 * @param candidates
 	 * @param node
+	 * @param confOut
+	 * @param confIn
+	 * @return
 	 */
 	private boolean populateFilter(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
 
