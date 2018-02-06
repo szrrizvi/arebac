@@ -90,7 +90,7 @@ public class TempFCCompare {
 			long end = System.nanoTime();
 			System.out.println(end-start);
 
-			//if (result != null){
+			if (result != null){
 				
 				/*for (Map<MyNode, Node> res : result){
 					for (MyNode key : res.keySet()){
@@ -111,8 +111,8 @@ public class TempFCCompare {
 					System.out.println();
 				}*/
 				
-				//System.out.println(result.size());
-			//}
+				System.out.println(result.size());
+			}
 		}
 	}
 

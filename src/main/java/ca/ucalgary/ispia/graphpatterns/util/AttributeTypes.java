@@ -44,6 +44,7 @@ public class AttributeTypes {
 	public static boolean isIntType(String attrName){
 
 		if (intTypes.isEmpty()){
+			intTypes.add("id");
 			intTypes.add("age");
 			intTypes.add("detailed industry recode");
 			intTypes.add("detailed occupation recode");

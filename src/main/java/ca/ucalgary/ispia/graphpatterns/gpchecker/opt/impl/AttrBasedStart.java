@@ -56,7 +56,7 @@ public class AttrBasedStart implements AltStart{
 		
 		//Iterate through all nodes
 		for (MyNode node : nodes){
-			if (node.hasAttributes()){	//Populate the candidate set for each node that has at least one required attribute	
+			if (node.hasAttributes()){	//Populate the candidate set for each node that has at least one required attribute
 				Set<Node> nodeCads = new HashSet<Node>();
 				
 				//Get the required attribute names and values
@@ -89,8 +89,6 @@ public class AttrBasedStart implements AltStart{
 					
 					//Iterate through the candidates that can satisfy the first attribute requirement
 					while(rite.hasNext()){
-						
-						//Check if the candidate can satisfy the other attribute requirements as well
 						//If so, add it to the nodeCads list
 						Node candidate = rite.next();
 						if (constraintsEvaluator.checkAttrs(node, candidate)){

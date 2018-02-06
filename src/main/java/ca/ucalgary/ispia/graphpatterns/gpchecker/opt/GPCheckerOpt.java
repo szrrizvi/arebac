@@ -198,8 +198,14 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		if (candidates.isEmpty()){
 			if (!altStart.startPop(gp.getNodes(), candidates)){
 				return null;
-			}
+			}/* else {
+				for (MyNode key : assignments.keySet()){
+					candidates.remove(key);
+				}
+			}*/
 		}
+		
+			
 
 		//If the candidates map is still empty, even after populating it through attribute
 		//requirements, then return null as we have no starting point.
@@ -268,14 +274,14 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Set<MyNode> jumpStack = new HashSet<MyNode>();
 		
-		System.out.println("CANDIDATES");
+		/*System.out.println("CANDIDATES");
 		for (MyNode key : candidates.keySet()){
 			System.out.print(key.getId() + ": ");
 			for (Node n : candidates.get(key)){
 				System.out.print(n.getId() + ", ");
 			}
 			System.out.println();
-		}
+		}*/
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints

@@ -394,6 +394,7 @@ public class GPCheckerFC implements GPChecker, Killable{
 		//(i.e. the relationships with its already assigned neighbours).
 		for(Node vertex : candidates.get(nextNode)){
 
+			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<Node>> candsClone = new HashMap<MyNode, Set<Node>>();
 			for (MyNode key : candidates.keySet()){
