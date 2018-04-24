@@ -341,8 +341,12 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 				if (jumpNodes != null && !jumpNodes.isEmpty()){
 					
 					if (!jumpNodes.contains(nextNode)){
+						//If there is a future node assignment that leads to a deadend, such that the future node has no conflicts with nextNode,
+						//then no other candidate of nextNode can prevent the deadend. Therefore, we can just return using jumpNodes.
 						return jumpNodes;
 					} else {
+						//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
+						//When we return from this call stack, we will return using jumpStack.
 						jumpStack.addAll(jumpNodes);
 					}
 				}
