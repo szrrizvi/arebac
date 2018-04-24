@@ -23,40 +23,6 @@ public class Driver {
 		//Test!
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
-		Random rand = new Random(3706715);
-		
-		EvalTestRunner etr = new EvalTestRunner(graphDb);
-				
-		try {
-			Neo4jQueries njq = new Neo4jQueries(graphDb);
-			njq.setDebug(true);
-			String q = "MATCH (Cd:PERSON) -[rela : RelD]->(Cb:PERSON) " +  
-							"MATCH (Ce:PERSON) -[relb : RelG]->(Cb:PERSON) " +
-							"MATCH (Ca:PERSON) -[relc : RelD]->(Cb:PERSON) " +
-							"MATCH (Cb:PERSON) -[reld : RelB]->(Cc:PERSON) " +
-							"MATCH (Cb:PERSON) -[rele : RelE]->(Cd:PERSON) " +
-							"MATCH (Cb:PERSON) -[relf : RelE]->(Ce:PERSON) " +
-							"WHERE Cb.`full or part time employment stat`=\"Children or Armed Forces\" AND Ce.`id`=3931 AND Ca.`major occupation code`=\"Not in universe\" AND Ca.`reason for unemployment`=\"Not in universe\" AND Ca.`own business or self employed`=0 AND Ca.`major industry code`=\"Not in universe or children\" AND relb.`weight`=7 AND relf.`weight`=4 AND Ca<>Cd " + 
-							"RETURN distinct Ca";
-			String q1 = "MATCH (n) WHERE n.id=32706 RETURN n";
-							
-			//njq.runQuery(q);
-			
-			TempFCCompare tfcc = new TempFCCompare(graphDb);
-			//tfcc.runTests(7, "0724files");
-			tfcc.runSpecificTest(202, "0724files/tests2");
-			
-			//etr.warmup(100);
-			//etr.writeDiffTests(rand, "0724files");
-			//etr.runTests(7, "0724files", true, true);
-			//etr.writeTests(rand, "0623files");
-			//etr.analyzeTests(1, "0621files");
-			//etr.debugging(7, "0724files");
-
-		} catch (Exception e){
-			e.printStackTrace();
-			System.out.println("Writing Failed");
-		}
 		
 		graphDb.shutdown();
 		System.out.println("ENDING");
