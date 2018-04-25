@@ -28,14 +28,17 @@ public class EvalTestGenWrapper {
 	private Random random;					//The random number generator
 	private int nodesSeedSize;				//The number of nodes to use as the seed for the second GPH
 
+	//Parameters for the database query (first graph pattern)
 	private int endSizeA, rootedA, numMexA, numVAttrsA, numEAttrsA;
 	private float pA;
 	private double completeA;
 
+	//Parameters for the access control policy (second graph pattern)
 	private int endSizeB, rootedB, numMexB, numVAttrsB, numEAttrsB;
 	private float pB;
 	private double completeB;
 
+	//flags to check if parameters have been set
 	private boolean paramsASet, paramsBSet;
 
 	/**
@@ -53,6 +56,16 @@ public class EvalTestGenWrapper {
 		this.paramsBSet = false;
 	}
 
+	/**
+	 * Sets the parameters for the database query (first graph pattern)
+	 * @param endSize
+	 * @param complete
+	 * @param rooted
+	 * @param p
+	 * @param numMex
+	 * @param numVAttrs
+	 * @param numEAttrs
+	 */
 	public void setParamsA(int endSize, double complete, int rooted, float p, int numMex, int numVAttrs, int numEAttrs){
 		this.endSizeA = endSize;
 		this.completeA = complete;
@@ -65,6 +78,16 @@ public class EvalTestGenWrapper {
 		this.paramsASet = true;
 	}
 
+	/**
+	 * Sets the parameters for the access control policy (second graph pattern)
+	 * @param endSize
+	 * @param complete
+	 * @param rooted
+	 * @param p
+	 * @param numMex
+	 * @param numVAttrs
+	 * @param numEAttrs
+	 */
 	public void setParamsB(int endSize, double complete, int rooted, float p, int numMex, int numVAttrs, int numEAttrs){
 		this.endSizeB = endSize;
 		this.completeB = complete;
@@ -85,6 +108,7 @@ public class EvalTestGenWrapper {
 	 */
 	public TripleGPHolder generateTests(){
 
+		//Check if the parameters have been set
 		if (!(paramsASet && paramsBSet)){
 			return null;
 		}

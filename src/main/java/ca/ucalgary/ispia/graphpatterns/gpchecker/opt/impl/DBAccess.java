@@ -23,7 +23,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
  *
  */
 
-public class DBAccess implements NeighbourhoodAccess{
+public class DBAccess implements NeighbourhoodAccess<Node>{
 	private final GraphDatabaseService graphDb;					//GraphDatabaseService - gives access to the database
 	private final ConstraintsEvaluator constraintsEvaluator;	//ConstraintsEvaluator - gives access to the components that ensures constraints are satisfied
 	
