@@ -44,7 +44,7 @@ public class EvalTestGenerator {
 	Map<Node, MyNode> nodesMap;				//Map from the db node to my node in the gp
 	Map<Relationship, MyRelationship> relsMap; //Map from the db relationships to my relationships in the gp
 
-	private int endSize, rooted;			//endsize = the minimal number of relationships after phase one
+	private int endSize, rooted;			//endsize = the minimal number of nodes after phase one
 	//rooted = the number of rooted nodes
 	private double complete;				//The minimal percent of the complete graph (after phase one). 0 = all acceptable, 1 = complete graph necessary
 
@@ -133,7 +133,6 @@ public class EvalTestGenerator {
 	 */
 	public GPHolder createDBBasedGP(List<Node> inputNodes){
 
-
 		//Setup allNodes and nodesPool
 		if (inputNodes == null || inputNodes.size()==0){
 			//Randomly pick the very first node if the input nodes list is blank
@@ -161,10 +160,10 @@ public class EvalTestGenerator {
 		//Make sure that gp passes the size requirement.
 		if (endSize > 4){
 			//# of maximum possible edges = (gp.getNodes().size() * (gp.getNodes().size()-1))/2) 
-			int finalSize = (int)Math.floor(complete * ((allNodes.size() * (allNodes.size()-1))/2));
+			int minRels = (int)Math.floor(complete * ((allNodes.size() * (allNodes.size()-1))/2));
 
-			if (rels.size() < finalSize){
-				System.out.println("failed here: " + complete + ", " + finalSize + " " + rels.size() + " " + allNodes.size());
+			if (rels.size() < minRels){
+				System.out.println("failed here: " + complete + ", " + minRels + " " + rels.size() + " " + allNodes.size());
 				return null; 
 			}
 		}
@@ -182,7 +181,7 @@ public class EvalTestGenerator {
 
 
 	/**
-	 * Picks n random nodes, and their appropriate MyNode mapping, from the list of nodes.
+	 * Picks random nodes, and their appropriate MyNode mapping, from the list of nodes.
 	 * @param numNodes The number of nodes to pick.
 	 * @return A randomly generated map from Node to MyNode of size n.
 	 */
@@ -195,6 +194,7 @@ public class EvalTestGenerator {
 		//Initialize the result set
 		Map<Node, MyNode> result = new HashMap<Node, MyNode>();
 
+		//Special case: If there are no relationships, then return all nodes.
 		if(rels.size() == 0){
 			for (Node node : nodesMap.keySet()){
 				result.put(node, nodesMap.get(node));
@@ -396,24 +396,22 @@ public class EvalTestGenerator {
 		for (Node n1 : allNodes){
 			try (Transaction tx = graphDb.beginTx()){
 				Iterable<Relationship> ite = n1.getRelationships(Direction.BOTH);
-
+				//For each node in allNode, get all relationshpis and iterate through each relationship.
+				
 				for (Relationship rel : ite){
-					Node n2 = rel.getOtherNode(n1);
+					Node n2 = rel.getOtherNode(n1);	//Get the other node
 
-					if (allNodes.contains(n2) && !n1.equals(n2)){
-						Pair<Node, Node> tempP = new Pair<Node, Node>(n1, n2);
-						if (!rels.contains(rel)){
-							if (!pairs.contains(tempP)){
-								rels.add(rel);
+					if (allNodes.contains(n2) && !n1.equals(n2)){					//If n2 is part of allNodes and n1 != n2
+						Pair<Node, Node> tempP = new Pair<Node, Node>(n1, n2);		//Create the corresponding Pair for the pair of nodes
+						if (!rels.contains(rel)){									//If the relationship is not already part of rels
+							if (!pairs.contains(tempP)){							//If the reverse of the relationship is not already part of rels
+								rels.add(rel);										//Add the relationship and the corresponding pairs to the lists.
 								pairs.add(tempP);
 								tempP = new Pair<Node, Node>(n2, n1);
 								pairs.add(tempP);
-							} else {
-								if (random.nextBoolean()){
-									rels.add(rel);
-									pairs.add(tempP);
-									tempP = new Pair<Node, Node>(n2, n1);
-									pairs.add(tempP);
+							} else {												//If the reverse of the relationship is already part of rels
+								if (random.nextBoolean()){							//Flip a coin to see if we should add the relationships to rels
+									rels.add(rel);									//This way we all "reverse" relationships
 								}
 							}
 						}
