@@ -1,4 +1,4 @@
-package ca.ucalgary.ispia.graphpatterns.graph;
+package ca.ucalgary.ispia.graphpatterns.tests;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +16,11 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 
+import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
+import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
+import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
+import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
+import ca.ucalgary.ispia.graphpatterns.graph.RelType;
 import ca.ucalgary.ispia.graphpatterns.util.AttributeTypes;
 import ca.ucalgary.ispia.graphpatterns.util.GPUtil;
 import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;

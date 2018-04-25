@@ -18,7 +18,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
 import ca.ucalgary.ispia.graphpatterns.gpchecker.GPCheckerFC;
-import ca.ucalgary.ispia.graphpatterns.graph.EvalTestGenerator;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.util.GPUtil;

@@ -9,7 +9,6 @@ import java.util.Random;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 
-import ca.ucalgary.ispia.graphpatterns.graph.EvalTestGenerator;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.HasAttributes;
