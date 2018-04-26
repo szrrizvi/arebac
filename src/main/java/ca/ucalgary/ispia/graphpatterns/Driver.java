@@ -9,6 +9,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import ca.ucalgary.ispia.graphpatterns.tests.EvalTestRunner;
 import ca.ucalgary.ispia.graphpatterns.tests.Neo4jQueries;
 import ca.ucalgary.ispia.graphpatterns.tests.TempFCCompare;
+import ca.ucalgary.ispia.graphpatterns.tests.TxtToGP;
 /**
  * The driver.
  * @author szrrizvi
@@ -21,11 +22,13 @@ public class Driver {
 	 */
 	public static void main(String[] args){	
 		//Test!
-		Driver d = new Driver();
-		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
+		//Driver d = new Driver();
+		//GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 		
-		graphDb.shutdown();
-		System.out.println("ENDING");
+		//graphDb.shutdown();
+		//System.out.println("ENDING");
+		
+		TxtToGP.readDataSet("Slashdot0902.txt");
 		
 	}
 
