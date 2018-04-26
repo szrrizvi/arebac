@@ -10,6 +10,7 @@ import org.neo4j.cypher.internal.frontend.v3_2.ast.functions.Max;
 
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
+import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.util.PathFit.Face;
@@ -162,9 +163,9 @@ public class Translator {
 		//Obtain the nodes from the graph pattern and iterate through the
 		//edges. 
 
-		for (MyNode node : gp.keySet()){
+		for (MyNode node : gp.srcKeySet()){
 
-			List<MyRelationship> rels = gp.getRelationships(node);
+			List<MyRelationship> rels = gp.getRelationships(node, MyDirection.OUTGOING);
 
 			for (MyRelationship rel : rels){
 				str.append("MATCH (" + node.getId() + ") -[]-> (" + rel.getTarget().getId() +")\n");

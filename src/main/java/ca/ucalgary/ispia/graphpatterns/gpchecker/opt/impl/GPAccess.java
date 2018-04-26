@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.ConstraintsEvaluator;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
+import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
+import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 
@@ -60,10 +61,10 @@ public class GPAccess implements NeighbourhoodAccess<MyNode>{
 
 		//Query the database for the neighbours of vertex, where direction = dir.
 		//Only keep the neighbours where the edge and vertex attributes are satisfied
-		Iterable<MyRelationship> result = vertex.getRelationships(rel.getIdentifier(), dir);
+		Iterable<MyRelationship> result = dataset.getRelationships(vertex, dir);
 
 		for (MyRelationship tempR : result){
-			MyNode neighbour = tempR.getOtherNode(vertex);
+			MyNode neighbour = tempR.getOther(vertex);
 			neighbours.add(neighbour);
 
 		}

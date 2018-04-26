@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
+import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 
@@ -146,7 +147,7 @@ public class LongestPaths {
 			startNodeIdx = nodes.indexOf(startNode);
 			startNode = next[startNodeIdx][endNodeIdx];
 
-			List<MyRelationship> temp = gp.getRelationships(prev);
+			List<MyRelationship> temp = gp.getRelationships(prev, MyDirection.OUTGOING);
 			path.add(getRelationship(temp, prev ,startNode));
 
 		}	
