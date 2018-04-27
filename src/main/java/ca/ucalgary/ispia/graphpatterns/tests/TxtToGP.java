@@ -6,14 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.graph.RelType;
 
 /**
- * Converts a input graph dataset to graph patterns. Essentially we are storing the dataset in memory. 
- * The graph patterns store the dataset as adjacency lists.
+ * Converts a input graph dataset to a DataSet object. Essentially we are storing the dataset in memory. 
+ * The DataSet stores the graph as adjacency lists.
  * Expected format for input file: Each line has 2 numeric values, representing a relationship. The value is the id for the node.
  * The first value is the source node and the second value is the target node for the relationship. 
  * @author rizvi
@@ -21,7 +22,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.RelType;
  */
 public class TxtToGP {
 
-	public static GraphPattern readDataSet(String fileName){
+	public static DataSet readDataSet(String fileName){
 
 		/**
 		 * Prepare to read the source file.
@@ -43,7 +44,7 @@ public class TxtToGP {
 		int progressNext = 0;
 		
 		//The graph pattern
-		GraphPattern gp = new GraphPattern();
+		DataSet gp = new DataSet();
 		
 		while (scan.hasNext()){
 			
@@ -103,7 +104,6 @@ public class TxtToGP {
 		
 		//Print GP size
 		System.out.println("Nodes: " + gp.getNodes().size());
-		System.out.println("Relationships: " + gp.getAllRelationships().size());
 		
 		//Return GP
 		return gp;

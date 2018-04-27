@@ -1,14 +1,20 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.util.Random;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Set;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.tests.EvalTestRunner;
-import ca.ucalgary.ispia.graphpatterns.tests.Neo4jQueries;
-import ca.ucalgary.ispia.graphpatterns.tests.TempFCCompare;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
+import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
+import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.tests.TxtToGP;
 /**
  * The driver.
@@ -28,8 +34,46 @@ public class Driver {
 		//graphDb.shutdown();
 		//System.out.println("ENDING");
 		
-		TxtToGP.readDataSet("Slashdot0902.txt");
+		//saveDataSet("Slashdot0902");
+		loadDataSet("Slashdot0902");
 		
+	}
+	
+	private static void loadDataSet(String fileName){
+		
+		DataSet dataSet = null;
+		
+		try {
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream("simulation-tests/"+fileName+".ser"));
+		dataSet = (DataSet) ois.readObject();
+		ois.close();
+		} catch (IOException e){
+			System.out.println("IOException" + e);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		DataSetWrapper dsw = new DataSetWrapper(dataSet);
+		MyNode node = dsw.getNodes().iterator().next();
+		Set<MyRelationship> rels = dsw.getAllRelationships(node);
+		System.out.println(dsw.getDegree(node));
+		for (MyRelationship r : rels){
+			System.out.println(r);
+		}
+	}
+	
+	private static void saveDataSet(String fileName){
+		DataSet ds = TxtToGP.readDataSet("simulation-tests/"+fileName+".txt");
+		
+		try {
+			FileOutputStream fout = new FileOutputStream("simulation-tests/"+fileName+".ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			oos.writeObject(ds);
+			oos.close();
+		} catch (IOException e){
+			System.out.println("IOException" + e);
+		}
 	}
 
 	/**

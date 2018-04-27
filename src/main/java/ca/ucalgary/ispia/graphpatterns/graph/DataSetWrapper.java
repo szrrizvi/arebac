@@ -15,9 +15,11 @@ import java.util.Set;
  * @author szrrizvi
  *
  */
-public class DataSetWrapper extends DataSet{
+public class DataSetWrapper{
 
 	private static final long serialVersionUID = 1L;
+	
+	DataSet dataSet;
 
 	//The adjacency list for incoming relationships. The key is a MyNode, and the value is the list of 
 	//relationships where the key is the target node.
@@ -27,7 +29,10 @@ public class DataSetWrapper extends DataSet{
 	/**
 	 * Default constructor. Initialize instance variables.
 	 */
-	public DataSetWrapper(){
+	public DataSetWrapper(DataSet dataSet){
+		
+		this.dataSet = dataSet;
+		
 		incomingRels = new HashMap<MyNode, Set<MyRelationship>>();
 		populateIncomingRels();
 	}
@@ -37,7 +42,7 @@ public class DataSetWrapper extends DataSet{
 	 */
 	public void populateIncomingRels(){
 		//Get the map of outgoing relationships
-		Map<MyNode, Set<MyRelationship>> outgoingRels = super.getOutgoingRels();
+		Map<MyNode, Set<MyRelationship>> outgoingRels = dataSet.getOutgoingRels();
 		
 		for (MyNode key : outgoingRels.keySet()){
 			//Iterate through the relationships for each src node
@@ -59,6 +64,10 @@ public class DataSetWrapper extends DataSet{
 		}
 	}
 	
+	public Set<MyNode> getNodes(){
+		return dataSet.getNodes();
+	}
+	
 	/**
 	 * Returns the set of relationships from the given node, based on the given direction.
 	 * @param node The node
@@ -72,7 +81,7 @@ public class DataSetWrapper extends DataSet{
 		
 		if (dir == MyDirection.OUTGOING){
 			//Outgoing relationships; node = src
-			result.addAll(getOutgoingRels().get(node));
+			result.addAll(dataSet.getOutgoingRels().get(node));
 		} else if (dir == MyDirection.INCOMING) {
 			//Incoming relationships; node = tgt
 			result.addAll(incomingRels.get(node));
@@ -90,7 +99,7 @@ public class DataSetWrapper extends DataSet{
 	public Set<MyRelationship> getAllRelationships(){
 
 		Set<MyRelationship> rels = new HashSet<MyRelationship>();
-		Map<MyNode, Set<MyRelationship>> outRels = getOutgoingRels();
+		Map<MyNode, Set<MyRelationship>> outRels = dataSet.getOutgoingRels();
 		
 		//Obtain the relationships from the map, and add them to the list.
 		for (MyNode node : outRels.keySet()){
@@ -111,7 +120,7 @@ public class DataSetWrapper extends DataSet{
 		Set<MyRelationship> result = new HashSet<MyRelationship>();
 
 		//Add all outgoing and incoming relationships for the node
-		result.addAll(getOutgoingRels().get(node));
+		result.addAll(dataSet.getOutgoingRels().get(node));
 		result.addAll(incomingRels.get(node));
 		return result;
 	}
@@ -125,8 +134,8 @@ public class DataSetWrapper extends DataSet{
 
 		//Iterate through the key set, and return false when the first 
 		//relationship is encountered.
-		for (MyNode source : getOutgoingRels().keySet()){
-			Set<MyRelationship> rels = getOutgoingRels().get(source);
+		for (MyNode source : dataSet.getOutgoingRels().keySet()){
+			Set<MyRelationship> rels = dataSet.getOutgoingRels().get(source);
 
 			if (!rels.isEmpty()){
 				return false;
@@ -144,11 +153,11 @@ public class DataSetWrapper extends DataSet{
 	public int getDegree(MyNode node){
 
 		//Check if node is part of graph pattern.
-		if (!getNodes().contains(node)){
+		if (!dataSet.getNodes().contains(node)){
 			return -1;
 		}
 
-		int degree = getOutgoingRels().get(node).size() + incomingRels.get(node).size();
+		int degree = dataSet.getOutgoingRels().get(node).size() + incomingRels.get(node).size();
 
 		return degree;
 	}
