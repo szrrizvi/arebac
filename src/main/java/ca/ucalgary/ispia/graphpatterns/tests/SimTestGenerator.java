@@ -55,11 +55,9 @@ public class SimTestGenerator {
 	 * @param complete The minimal percent of the complete graph (after phase one). 0 = all acceptable, 1 = complete graph necessary
 	 * @param rooted The number of rooted nodes
 	 * @param p	The probability to keep a relationship
-	 * @param numMex The number of mutual exclusion constraitns
-	 * @param numAttrs The number of attribute requirements
 	 * @param nodePrefix The prefix for the node names
 	 */
-	public SimTestGenerator(DataSetWrapper dataSet, Random random, int endSize, double complete,  int rooted, float p, int numMex, int numVAttrs, int numEAttrs, String nodePrefix){
+	public SimTestGenerator(DataSetWrapper dataSet, Random random, int endSize, double complete,  int rooted, float p, String nodePrefix){
 
 		//Set the graphdb and the random number generator
 		this.dataSet = dataSet;

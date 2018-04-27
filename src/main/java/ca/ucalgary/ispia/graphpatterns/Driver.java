@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Random;
 import java.util.Set;
 
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -13,8 +14,10 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
+import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
+import ca.ucalgary.ispia.graphpatterns.tests.SimTestGenerator;
 import ca.ucalgary.ispia.graphpatterns.tests.TxtToGP;
 /**
  * The driver.
@@ -35,11 +38,11 @@ public class Driver {
 		//System.out.println("ENDING");
 		
 		//saveDataSet("Slashdot0902");
-		loadDataSet("Slashdot0902");
+		testDataSet("Slashdot0902");
 		
 	}
 	
-	private static void loadDataSet(String fileName){
+	private static void testDataSet(String fileName){
 		
 		DataSet dataSet = null;
 		
@@ -61,6 +64,14 @@ public class Driver {
 		for (MyRelationship r : rels){
 			System.out.println(r);
 		}
+		
+		SimTestGenerator stg = new SimTestGenerator(dsw, new Random(), 13, 0.1d,  1, 0.5f, "nodes");
+		
+		GPHolder gph = null;
+		while (gph == null){
+			gph = stg.createDBBasedGP();
+		}
+		System.out.println(gph.getGp());
 	}
 	
 	private static void saveDataSet(String fileName){
