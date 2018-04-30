@@ -2,15 +2,22 @@ package ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
+
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
-import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
+import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
 
 /**
  * This class provides the wrapper for invoking database queries against the database.
@@ -18,16 +25,16 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
  *
  */
 
-public class GPAccess implements NeighbourhoodAccess<MyNode>{
+public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
-	GraphPattern dataset;
+	DataSetWrapper dataset;
 
 	/**
 	 * Initilizes the instance variables.
 	 * @param graphDb The GraphDatabaseService
 	 * @param constraintsChecker The ConstraintsChecker
 	 */
-	public GPAccess (GraphPattern dataset){
+	public DSAccess (DataSetWrapper dataset){
 		//Initialize the instance variables
 		this.dataset = dataset;
 	}
@@ -70,5 +77,41 @@ public class GPAccess implements NeighbourhoodAccess<MyNode>{
 		}
 
 		return neighbours;
+	}
+
+	@Override
+	public MyNode findNode(MyNode src) {
+		return findNode(src, Integer.parseInt(src.getAttribute("id")));
+	}
+
+	@Override
+	public MyNode findNode(MyNode src, Integer id) {
+		MyNode tgt = dataset.findNode(src.getAttribute("id"));
+
+		if (tgt == null){
+			//If the node is not found, return null
+			System.out.println("Not fixed: " + id+"");
+		}
+
+		return tgt;
+	}
+
+	@Override
+	public boolean relationshipExists(MyNode src, MyNode tgt, MyRelationship rel) {
+		boolean retVal = false;
+
+		//Check if the relationship exists between them.
+		Iterator<MyRelationship> relIte = dataset.getRelationships(src, MyDirection.OUTGOING).iterator(); 
+
+		while (relIte.hasNext()){
+			MyRelationship r = relIte.next();
+			MyNode neighbour = r.getTarget();
+
+			if (neighbour.equals(tgt)){
+				retVal = true;
+			}
+		}
+
+		return retVal;
 	}
 }

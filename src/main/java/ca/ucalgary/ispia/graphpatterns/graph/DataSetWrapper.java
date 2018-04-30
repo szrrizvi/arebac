@@ -170,6 +170,19 @@ public class DataSetWrapper{
 		return degree;
 	}
 	
+	public MyNode findNode(String id){
+		Set<MyNode> nodes = dataSet.getNodes();
+		
+		for (MyNode node : nodes){
+			if (node.getAttribute("id").equals(id)){
+				return node;
+			}
+		}
+		
+		return null;
+	}
+	
+	
 	public String toString(){
 		return super.toString();
 	}

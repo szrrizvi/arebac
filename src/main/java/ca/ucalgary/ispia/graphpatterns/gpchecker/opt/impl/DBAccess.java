@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -27,14 +28,14 @@ import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
 
 public class DBAccess implements NeighbourhoodAccess<Node>{
 	private final GraphDatabaseService graphDb;					//GraphDatabaseService - gives access to the database
-	private final ConstraintsEvaluator constraintsEvaluator;	//ConstraintsEvaluator - gives access to the components that ensures constraints are satisfied
+	private final ConstraintsEvaluator<Node, Entity> constraintsEvaluator;	//ConstraintsEvaluator - gives access to the components that ensures constraints are satisfied
 	
 	/**
 	 * Initilizes the instance variables.
 	 * @param graphDb The GraphDatabaseService
 	 * @param constraintsChecker The ConstraintsChecker
 	 */
-	public DBAccess (GraphDatabaseService graphDb, ConstraintsEvaluator constraintsEvaluator){
+	public DBAccess (GraphDatabaseService graphDb, ConstraintsEvaluator<Node, Entity> constraintsEvaluator){
 		//Initialize the instance variables
 		this.graphDb = graphDb;
 		this.constraintsEvaluator = constraintsEvaluator;
