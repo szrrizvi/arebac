@@ -21,4 +21,10 @@ public interface NeighbourhoodAccess<N> {
 	 * @return The set of neighbours that satisfy the associated constraints.
 	 */
 	public abstract Set<N> findNeighbours(MyRelationship rel, MyNode node, N vertex);
+	
+	public abstract N findNode(MyNode src);
+	
+	public abstract N findNode(MyNode src, Integer id);
+	
+	public abstract boolean relationshipExists (N src, N tgt, MyRelationship rel);
 }

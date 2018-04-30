@@ -120,8 +120,16 @@ public class DataSetWrapper{
 		Set<MyRelationship> result = new HashSet<MyRelationship>();
 
 		//Add all outgoing and incoming relationships for the node
-		result.addAll(dataSet.getOutgoingRels().get(node));
-		result.addAll(incomingRels.get(node));
+		Set<MyRelationship> temp = dataSet.getOutgoingRels().get(node);
+		if (temp != null){
+			result.addAll(temp);
+		}
+		
+		temp = incomingRels.get(node);
+		if (temp != null){
+			result.addAll(temp);
+		}
+		
 		return result;
 	}
 	

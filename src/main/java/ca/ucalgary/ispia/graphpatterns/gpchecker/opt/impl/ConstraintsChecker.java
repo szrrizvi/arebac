@@ -24,7 +24,7 @@ import ca.ucalgary.ispia.graphpatterns.util.Pair;
  * @author szrrizvi
  *
  */
-public class ConstraintsChecker implements ConstraintsEvaluator{
+public class ConstraintsChecker implements ConstraintsEvaluator<Node, Entity>{
 
 
 	private final GPHolder gph;					//GPHolder - gives access to the constraints

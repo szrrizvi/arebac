@@ -8,12 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
-
 import ca.ucalgary.ispia.graphpatterns.gpchecker.GPChecker;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ConstraintsChecker;
@@ -34,19 +28,19 @@ import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
  *
  */
 
-public class GPCheckerFCCBJ implements GPChecker, Killable{
+public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
-	private final GraphDatabaseService graphDb;			//The graph database interface
+	//private final GraphDatabaseService graphDb;			//The graph database interface
 	private int queryCount;							//The counter for transactions
 	private final GPHolder gph;							//The GPHolder
 	private final GraphPattern gp;						//The graph pattern contained in gph
-	public List<Map<MyNode, Node>> queryResults;	//The list of results that satisfy the query
+	public List<Map<MyNode, N>> queryResults;	//The list of results that satisfy the query
 
 	//The modularized components
-	private final ConstraintsEvaluator consEval;
-	private final NeighbourhoodAccess neighbourhoodAccess;
-	private final VariableOrdering variableOrdering;
-	private final AltStart altStart;
+	private final ConstraintsEvaluator<N, E> consEval;
+	private final NeighbourhoodAccess<N> neighbourhoodAccess;
+	private final VariableOrdering<N> variableOrdering;
+	private final AltStart<N> altStart;
 
 
 	private boolean killed;							//The kill flag.
@@ -56,21 +50,21 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * @param graphDb The database to set
 	 * @param gph The graph pattern holder
 	 */
-	public GPCheckerFCCBJ(GraphDatabaseService graphDb, GPHolder gph){
+	public GPCheckerFCCBJ(GPHolder gph, ConstraintsEvaluator<N, E> consEval, NeighbourhoodAccess<N> neighbourhoodAccess, VariableOrdering<N> variableOrdering, AltStart<N> altStart){
 		//Assign the fields
-		this.graphDb = graphDb;
+		//this.graphDb = graphDb;
 		this.gph = gph;
 		this.gp = gph.getGp();
 
 		//Initialize the results, the counter, and the kill flag
-		queryResults = new ArrayList<Map<MyNode, Node>>();
+		queryResults = new ArrayList<Map<MyNode, N>>();
 		queryCount = 0;
 		killed = false;
 
-		this.consEval = new ConstraintsChecker(gph, graphDb);
-		this.neighbourhoodAccess = new DBAccess (graphDb, consEval);
-		this.variableOrdering = new LeastCandidates(gp);
-		this.altStart = new AttrBasedStart(graphDb, consEval);
+		this.consEval = consEval;
+		this.neighbourhoodAccess = neighbourhoodAccess;
+		this.variableOrdering = variableOrdering;
+		this.altStart = altStart;
 
 	}
 
@@ -89,10 +83,10 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * Runs the query evaluation algorithm.
 	 * @return The query result
 	 */
-	public List<Map<MyNode, Node>> check(){
+	public List<Map<MyNode, N>> check(){
 		//Initialize the assignments and candidates maps
-		Map<MyNode, Node> assignments = new HashMap<MyNode, Node>();
-		Map<MyNode, Set<Node>> candidates = new HashMap<MyNode, Set<Node>>();
+		Map<MyNode, N> assignments = new HashMap<MyNode, N>();
+		Map<MyNode, Set<N>> candidates = new HashMap<MyNode, Set<N>>();
 
 		//Delegate to the overloaded method
 		return check_init(assignments, candidates);
@@ -106,31 +100,21 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * for each key is the value of the "id" attribute
 	 * @return The query result
 	 */
-	public List<Map<MyNode, Node>> check(Map<MyNode, Integer> extraInfo){
+	public List<Map<MyNode, N>> check(Map<MyNode, Integer> extraInfo){
 		//Initialize the assignments and candidates maps
-		Map<MyNode, Node> assignments = new HashMap<MyNode, Node>();
-		Map<MyNode, Set<Node>> candidates = new HashMap<MyNode, Set<Node>>();
+		Map<MyNode, N> assignments = new HashMap<MyNode, N>();
+		Map<MyNode, Set<N>> candidates = new HashMap<MyNode, Set<N>>();
 
 		//For each node in the extraInfo map
 		for (MyNode node : extraInfo.keySet()){
-			try (Transaction tx = graphDb.beginTx()){
-				//Fix the MyNode object to the corresponding Node from the database
-				//based on the id property
-				Node vertex = graphDb.findNode(LabelEnum.PERSON, "id", extraInfo.get(node));
-				if (vertex == null){
-					//return null is no db node found with the given id
-					return null;
-				}
-
-				if (consEval.checkAttrs(node, vertex)){
-					//If the db node satisfies all attribute requirements, then add the mapping to the
-					//assignments map
-					assignments.put(node, vertex);
-				} else {
-					return null;
-				}
-				tx.success();
+			
+			N vertex = neighbourhoodAccess.findNode(node, extraInfo.get(node));
+			if (vertex != null){
+				assignments.put(node, vertex);
+			} else {
+				return null;
 			}
+			
 		}
 		//Continue on by delegating to the overloaded method
 		return check_init(assignments, candidates);
@@ -145,7 +129,7 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * @param assignments 
 	 * @return the query result
 	 */
-	private List<Map<MyNode, Node>> check_init(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates){
+	private List<Map<MyNode, N>> check_init(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates){
 
 		//Get the set of pre fixed nodes
 		Set<MyNode> alreadyFixed = assignments.keySet();
@@ -156,24 +140,12 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 			//These nodes are not already fixed and have the id attribute
 			if (!alreadyFixed.contains(node) && node.hasAttribute("id")){
 
-				try (Transaction tx = graphDb.beginTx()){
-					//Obtain the db nodes with the matching id
-					Node vertex = graphDb.findNode(LabelEnum.PERSON, "id", Integer.parseInt(node.getAttribute("id")));
-					if (vertex == null){
-						//If the node is not found, return null
-						System.out.println("Not fixed: " + node.getAttribute("id"));
-						return null;
-					}
-
-					if (consEval.checkAttrs(node, vertex)){
-						//If all requirements pass, add the assignment
-						assignments.put(node, vertex);						
-					} else {
-						return null;
-					}
-
-					tx.success();
-				}
+				N vertex = neighbourhoodAccess.findNode(node);
+				if (vertex != null){
+					assignments.put(node, vertex);
+				} else {
+					return null;
+				}				
 			}
 		}
 		//Check the direct relationships between the fixed nodes
@@ -231,7 +203,7 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * @return
 	 */
 
-	private Set<MyNode> check_rec(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, Map<MyNode, Set<MyNode>> confIn){
+	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn){
 
 		//If the search has been killed, return false
 		if (killed){
@@ -245,12 +217,12 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 
 			//Add the assignments for the queryResults list
 			List<MyNode> resultSchema = gph.getResultSchema();
-			Map<MyNode, Node> result = new HashMap<MyNode, Node>();
+			Map<MyNode, N> result = new HashMap<MyNode, N>();
 
 
 			//Copy the nodes from the resultSchema to the result map
 			for (MyNode req : resultSchema){
-				Node node = assignments.get(req);
+				N node = assignments.get(req);
 				result.put(req, node);
 			}
 
@@ -286,24 +258,24 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
-		for(Node vertex : candidates.get(nextNode)){
+		for(N vertex : candidates.get(nextNode)){
 			
 			//Clone the candidates and assignments map
-			Map<MyNode, Set<Node>> candsClone = new HashMap<MyNode, Set<Node>>();
+			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
 			for (MyNode key : candidates.keySet()){
 				//Get the set of candidates
-				Set<Node> candidatesSet = new HashSet<Node>(); 
+				Set<N> candidatesSet = new HashSet<N>(); 
 
-				for (Node candidate : candidates.get(key)){
+				for (N candidate : candidates.get(key)){
 					candidatesSet.add(candidate);
 				}
 				candsClone.put(key, candidatesSet);
 			}
 
-			Map<MyNode, Node> assnClone = new HashMap<MyNode, Node>();
+			Map<MyNode, N> assnClone = new HashMap<MyNode, N>();
 			for (MyNode key : assignments.keySet()){
 				//Get the assigned vertex
-				Node assn = assignments.get(key);
+				N assn = assignments.get(key);
 				assnClone.put(key, assn);
 			}
 			//Update the clones based on current assignment
@@ -379,9 +351,9 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * @param confIn
 	 * @return
 	 */
-	private boolean populateFilter(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
+	private boolean populateFilter(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
 
-		Node vertex = assignments.get(node);
+		N vertex = assignments.get(node);
 		//Get all of the relationships from GP that contain the given node.
 		List<MyRelationship> rels = gp.getAllRelationships(node);
 
@@ -392,11 +364,11 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 
 			//If the other node is not already been assigned, then populate/filter it
 			if (!assignments.containsKey(otherNode)){
-				Set<Node> neighbours = neighbourhoodAccess.findNeighbours(rel, node, vertex);
+				Set<N> neighbours = neighbourhoodAccess.findNeighbours(rel, node, vertex);
 
 				if (candidates.containsKey(otherNode)){
 					//If the candidates set exists, then filter it
-					Set<Node> temp = candidates.get(otherNode);
+					Set<N> temp = candidates.get(otherNode);
 
 					//If there is filtering, then add the incoming conflict.
 					if (!neighbours.containsAll(temp)){
@@ -436,7 +408,7 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 	 * @param fixedNodes
 	 * @return
 	 */
-	private boolean preCheck(Map<MyNode, Node> fixedNodes){//, Set<MyNode> visitedNodes){
+	private boolean preCheck(Map<MyNode, N> fixedNodes){//, Set<MyNode> visitedNodes){
 
 		//Get all of the relationships from GP.
 		List<MyRelationship> rels = gp.getAllRelationships();
@@ -448,30 +420,13 @@ public class GPCheckerFCCBJ implements GPChecker, Killable{
 
 
 				//Get the nodes
-				Node source = fixedNodes.get(rel.getSource());
-				Node target = fixedNodes.get(rel.getTarget());
-
-				boolean passed = false;	//Flag for checking if relationship passed
-
-				//Check if the relationship exists between them.
-				try (Transaction tx = graphDb.beginTx()){
-					queryCount++;
-					Iterator<Relationship> relIte = source.getRelationships(rel.getIdentifier(), Direction.OUTGOING).iterator();
-
-					while (relIte.hasNext() && !passed){
-						Relationship r = relIte.next();
-						Node neighbour = r.getEndNode();
-
-						if (neighbour.equals(target)){
-							passed = true;
-						}
-					}
-
-					tx.success();
-				}
+				N source = fixedNodes.get(rel.getSource());
+				N target = fixedNodes.get(rel.getTarget());
+				
+				boolean relExists = neighbourhoodAccess.relationshipExists(source, target, rel);
 
 				//If the relationship did not pass, then return false
-				if (!passed){
+				if (!relExists){
 					return false;
 				}
 			}

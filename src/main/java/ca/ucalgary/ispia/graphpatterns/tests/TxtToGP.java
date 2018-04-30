@@ -92,7 +92,7 @@ public class TxtToGP {
 			
 			//Update progress counter
 			progressNext++;
-			if (progressNext > (progress + 1000)){
+			if (progressNext > (progress + 500000)){
 				System.out.println(progressNext + ": " +line);
 				progress = progressNext;
 			}

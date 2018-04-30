@@ -13,7 +13,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
  * @author szrrizvi
  *
  */
-public interface AltStart {
+public interface AltStart<N> {
 
 	/**
 	 * Populates the candidates maps.
@@ -25,5 +25,5 @@ public interface AltStart {
 	 * 
 	 * Side Effect: candidates will be updated
 	 */
-	public abstract boolean startPop(List<MyNode> nodes, Map<MyNode, Set<Node>> candidates);
+	public abstract boolean startPop(List<MyNode> nodes, Map<MyNode, Set<N>> candidates);
 }

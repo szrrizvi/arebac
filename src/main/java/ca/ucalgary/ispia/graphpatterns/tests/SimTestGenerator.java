@@ -147,7 +147,6 @@ public class SimTestGenerator {
 		if (endSize > 4){
 			//# of maximum possible edges = (gp.getNodes().size() * (gp.getNodes().size()-1))/2) 
 			int minRels = (int)Math.floor(complete * ((allNodes.size() * (allNodes.size()-1))/2));
-
 			if (rels.size() < minRels){
 				System.out.println("failed here: " + complete + ", " + minRels + " " + rels.size() + " " + allNodes.size());
 				return null; 
@@ -466,15 +465,13 @@ public class SimTestGenerator {
 
 			MyRelationship rel = new MyRelationship(source, target, type, relPrefix + ((char) (97 + relCount)));
 			relCount++;
-			MyRelationship relOpp = new MyRelationship(target, source, type, relPrefix + ((char) (97 + relCount)));
-			relCount++;
 
 			if (relCount >= 25){
 				relCount = 0;
 				relPrefix = relPrefix + "l";
 			}
 
-			if (!source.equals(target) && !gp.getAllRelationships().contains(relOpp)){
+			if (!source.equals(target)){
 				gp.addRelationship(rel);
 				relsMap.put(r, rel);
 			}

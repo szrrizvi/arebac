@@ -3,9 +3,6 @@ package ca.ucalgary.ispia.graphpatterns.gpchecker.opt;
 import java.util.Map;
 import java.util.Set;
 
-import org.neo4j.graphdb.Entity;
-import org.neo4j.graphdb.Node;
-
 import ca.ucalgary.ispia.graphpatterns.graph.HasAttributes;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 
@@ -15,14 +12,14 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
  * @author szrrizvi
  *
  */
-public interface ConstraintsEvaluator {
+public interface ConstraintsEvaluator<N, E> {
 
 	/**
 	 * Simple constructor. Assigns the instance variables.
 	 * @param gph The GPHolder
 	 * @param graphDb The GraphDatabaseService
 	 */
-	public abstract void mexFilter(MyNode variable, Set<Node> candidates, Map<MyNode, Node> assignments, Map<MyNode, Set<MyNode>> confIn);
+	public abstract void mexFilter(MyNode variable, Set<N> candidates, Map<MyNode, N> assignments, Map<MyNode, Set<MyNode>> confIn);
 	
 	/**
 	 * Filters the candidates set based on the mutual exclusion constraints and current assignment
@@ -30,5 +27,5 @@ public interface ConstraintsEvaluator {
 	 * @param node The assignment for the target node
 	 * @param candidates The list of candidates for the currently populated nodes
 	 */
-	public abstract boolean checkAttrs(HasAttributes source, Entity target);
+	public abstract boolean checkAttrs(HasAttributes source, E target);
 }

@@ -2,6 +2,7 @@ package ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.ConstraintsEvaluator;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
+import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
 
 /**
  * This class provides the wrapper for invoking database queries against the database.
@@ -84,5 +86,79 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		}
 
 		return neighbours;
+	}
+	
+	public Node findNode(MyNode src){
+		
+		Node tgt = null;
+		
+		try (Transaction tx = graphDb.beginTx()){
+			
+			tgt = graphDb.findNode(LabelEnum.PERSON, "id", Integer.parseInt(src.getAttribute("id")));
+			
+			if (tgt == null){
+				//If the node is not found, return null
+				System.out.println("Not fixed: " + src.getAttribute("id"));
+			}
+
+			if (!constraintsEvaluator.checkAttrs(src, tgt)){
+				//If other attr requirements fail, then tgt is not the correct node
+				tgt = null;						
+			}	
+			tx.success();
+		}
+		return tgt;
+	}
+	
+	public Node findNode(MyNode src, Integer id){
+		Node tgt = null;
+		
+		try (Transaction tx = graphDb.beginTx()){
+			
+			tgt = graphDb.findNode(LabelEnum.PERSON, "id", id);
+			
+			if (tgt == null){
+				//If the node is not found, return null
+				System.out.println("Not fixed: " + id);
+			}
+			
+			if (!constraintsEvaluator.checkAttrs(src, tgt)){
+				//If other attr requirements fail, then tgt is not the correct node
+				tgt = null;						
+			}
+
+			tx.success();
+		}
+		return tgt;
+	}
+	
+	public boolean relationshipExists (Node src, Node tgt, MyRelationship rel){
+		
+		Relationship dbRel = null;
+		boolean retVal = false;
+		
+		//Check if the relationship exists between them.
+		try (Transaction tx = graphDb.beginTx()){
+			Iterator<Relationship> relIte = src.getRelationships(rel.getIdentifier(), Direction.OUTGOING).iterator();
+
+			while (relIte.hasNext() && dbRel == null){
+				Relationship r = relIte.next();
+				Node neighbour = r.getEndNode();
+
+				if (neighbour.equals(tgt)){
+					dbRel = r;
+				}
+			}
+
+			if (dbRel != null){
+				if(!constraintsEvaluator.checkAttrs(rel, dbRel)){
+					dbRel = null;
+				}
+			}
+			
+			tx.success();
+		}
+		
+		return retVal;
 	}
 }

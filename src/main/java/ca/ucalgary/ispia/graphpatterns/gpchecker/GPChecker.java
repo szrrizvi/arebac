@@ -13,12 +13,12 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
  * @author szrrizvi
  *
  */
-public interface GPChecker {
+public interface GPChecker<N, E> {
 	/**
 	 * Evaluates the stored graph pattern.
 	 * @return The list of all maps, from graph pattern nodes to the database nodes, that together satisfy the pattern.
 	 */
-	public List<Map<MyNode, Node>> check();
+	public List<Map<MyNode, N>> check();
 	
 	/**
 	 * Internal debugging/analyzing method. Used for counting the number of database invokactions. 

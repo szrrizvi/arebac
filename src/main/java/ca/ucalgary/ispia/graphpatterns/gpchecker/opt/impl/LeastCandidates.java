@@ -16,7 +16,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
  * @author szrrizvi
  *
  */	
-public class LeastCandidates implements VariableOrdering{
+public class LeastCandidates<N> implements VariableOrdering<N>{
 
 	
 	private final GraphPattern gp;	//The associated graph pattern
@@ -37,7 +37,7 @@ public class LeastCandidates implements VariableOrdering{
 	 * @param candidates The map of populated nodes and their candidates
 	 * @return The next node to be assigned in the algorithm
 	 */
-	public MyNode pickNextNode(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates){
+	public MyNode pickNextNode(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates){
 
 		List<MyNode> allNodes = gp.getNodes();
 		// Find nodes such that they are populated but not yet assigned.

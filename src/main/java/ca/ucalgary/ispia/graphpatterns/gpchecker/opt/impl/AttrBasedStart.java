@@ -22,7 +22,7 @@ import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
  * @author szrrizvi
  *
  */
-public class AttrBasedStart implements AltStart{
+public class AttrBasedStart implements AltStart<Node>{
 	
 	
 	private final GraphDatabaseService graphDb;					//GraphDatabaseService: Provides access to database

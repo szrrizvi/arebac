@@ -6,8 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -15,8 +16,6 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
-import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
-import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.tests.SimTestGenerator;
 import ca.ucalgary.ispia.graphpatterns.tests.TxtToGP;
 /**
@@ -37,12 +36,55 @@ public class Driver {
 		//graphDb.shutdown();
 		//System.out.println("ENDING");
 		
-		//saveDataSet("Slashdot0902");
-		testDataSet("Slashdot0902");
+		Random rand = new Random(4087955);
+		DataSetWrapper dsw = loadDataSet("Slashdot0902");
+		System.out.println("Done reading");
+		generateSimTests(dsw, "Slashdot0902", rand);
+		
+		//saveDataSet("soc-pokec-relationships");
 		
 	}
 	
-	private static void testDataSet(String fileName){
+	private static void generateSimTests(DataSetWrapper dsw, String name, Random rand){
+		
+		int endSize = 6;
+		double complete = 0.4d;
+		int rooted = 1; 
+		float p = 0.01f; 
+		String nodePrefix = "n";
+		
+		
+		for (endSize = 6; endSize < 16; endSize = endSize+2){
+		
+			if (endSize >= 10){
+				complete = 0.15d;
+			}
+		
+			List<GPHolder> list = new ArrayList<GPHolder>();
+			for (int count = 0; count < 1000; count++){
+				GPHolder gph = null;
+				while (gph == null){
+					SimTestGenerator stg = new SimTestGenerator(dsw, rand, endSize, complete,  rooted, p, nodePrefix);
+					gph = stg.createDBBasedGP();
+				}
+				list.add(gph);
+			}
+			
+			try {
+				FileOutputStream fout = new FileOutputStream("simulation-tests/"+name+"/test+"+endSize+".ser");
+				ObjectOutputStream oos = new ObjectOutputStream(fout);
+				oos.writeObject(list);
+				oos.close();
+			} catch (IOException e){
+				System.out.println("IOException" + e);
+			}
+			System.out.println("Completed: " +endSize);
+		}
+		
+		
+	}
+	
+	private static DataSetWrapper loadDataSet(String fileName){
 		
 		DataSet dataSet = null;
 		
@@ -58,20 +100,7 @@ public class Driver {
 		}
 		
 		DataSetWrapper dsw = new DataSetWrapper(dataSet);
-		MyNode node = dsw.getNodes().iterator().next();
-		Set<MyRelationship> rels = dsw.getAllRelationships(node);
-		System.out.println(dsw.getDegree(node));
-		for (MyRelationship r : rels){
-			System.out.println(r);
-		}
-		
-		SimTestGenerator stg = new SimTestGenerator(dsw, new Random(), 13, 0.1d,  1, 0.5f, "nodes");
-		
-		GPHolder gph = null;
-		while (gph == null){
-			gph = stg.createDBBasedGP();
-		}
-		System.out.println(gph.getGp());
+		return dsw;
 	}
 	
 	private static void saveDataSet(String fileName){
