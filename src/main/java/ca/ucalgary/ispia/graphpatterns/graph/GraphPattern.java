@@ -205,8 +205,16 @@ public class GraphPattern implements Serializable{
 		List<MyRelationship> result = new ArrayList<MyRelationship>();
 
 		//Add all outgoing and incoming relationships for the node
-		result.addAll(outgoingRels.get(node));
-		result.addAll(incomingRels.get(node));
+		//Add all outgoing and incoming relationships for the node
+		List<MyRelationship> temp = outgoingRels.get(node);
+		if (temp != null){
+			result.addAll(temp);
+		}
+		
+		temp = incomingRels.get(node);
+		if (temp != null){
+			result.addAll(temp);
+		}
 		return result;
 	}
 

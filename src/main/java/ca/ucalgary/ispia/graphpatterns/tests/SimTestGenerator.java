@@ -158,6 +158,7 @@ public class SimTestGenerator {
 
 		//Generate and return the GPHolder
 		this.gpHolder = new GPHolder(gp, null, new HashMap<String, MyNode>());
+		assignResultSchema();
 		return this.gpHolder;
 	}
 
@@ -459,9 +460,9 @@ public class SimTestGenerator {
 			//For each relationship in rels, create a corresponding relationship in gp.
 			//Note: this will add the appropriate nodes as well.
 
-				source = nodesMap.get(r.getSource());
-				target = nodesMap.get(r.getTarget());
-				type = GPUtil.translateRelType(r.getIdentifier());
+			source = nodesMap.get(r.getSource());
+			target = nodesMap.get(r.getTarget());
+			type = GPUtil.translateRelType(r.getIdentifier());
 
 			MyRelationship rel = new MyRelationship(source, target, type, relPrefix + ((char) (97 + relCount)));
 			relCount++;
@@ -479,6 +480,29 @@ public class SimTestGenerator {
 
 		//Set the attribute requirements
 		return gp;
+	}
+
+	private void assignResultSchema(){
+
+		if (gpHolder != null){
+			List<MyNode> temp = new ArrayList<MyNode>();
+			temp.addAll(gpHolder.getGp().getNodes());
+
+			List<MyNode> resultSchema = new ArrayList<MyNode>();
+
+			int schemaSize = 0;
+
+			while (schemaSize == 0){
+				schemaSize = random.nextInt(temp.size());
+			}
+
+			for (int count = 0; count < schemaSize; count++){
+				MyNode resNode = temp.remove(random.nextInt(temp.size()));
+				resultSchema.add(resNode);
+			}
+
+			gpHolder.setResultSchema(resultSchema);
+		}
 	}
 
 

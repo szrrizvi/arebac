@@ -1,23 +1,18 @@
 package ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
-
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
-import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
 
 /**
  * This class provides the wrapper for invoking database queries against the database.
@@ -27,7 +22,10 @@ import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
 
 public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
-	DataSetWrapper dataset;
+	private DataSetWrapper dataset;
+	private Map<Integer, Integer> neighbourhoodSizes; 
+
+	
 
 	/**
 	 * Initilizes the instance variables.
@@ -37,6 +35,11 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 	public DSAccess (DataSetWrapper dataset){
 		//Initialize the instance variables
 		this.dataset = dataset;
+		neighbourhoodSizes = new HashMap<Integer, Integer>();
+	}
+	
+	public Map<Integer, Integer> getNeighbourhoodSizes() {
+		return neighbourhoodSizes;
 	}
 
 	/**
@@ -50,12 +53,6 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
 		//Setup the checking step
 		Set<MyNode> neighbours = new HashSet<MyNode>();					//The list containing the result
-		MyNode otherNode = rel.getOther(node);						//The other node in the relationship
-
-		//Prepare the list of edge attribute requirements (if any)
-		Map<String, String> eAttrReqs = rel.getAttributes();	
-		List<String> eAttrNames = new ArrayList<String>();
-		eAttrNames.addAll(eAttrReqs.keySet());
 
 		//Get the direction
 		MyDirection dir = null;
@@ -65,15 +62,21 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 			dir = MyDirection.INCOMING;
 		}
 
-
 		//Query the database for the neighbours of vertex, where direction = dir.
 		//Only keep the neighbours where the edge and vertex attributes are satisfied
 		Iterable<MyRelationship> result = dataset.getRelationships(vertex, dir);
-
 		for (MyRelationship tempR : result){
 			MyNode neighbour = tempR.getOther(vertex);
 			neighbours.add(neighbour);
 
+		}
+		
+		int size = neighbours.size();
+		if (neighbourhoodSizes.containsKey(size)){
+			int val = neighbourhoodSizes.get(size)+1;
+			neighbourhoodSizes.put(size, val);
+		} else {
+			neighbourhoodSizes.put(size, 1);
 		}
 
 		return neighbours;

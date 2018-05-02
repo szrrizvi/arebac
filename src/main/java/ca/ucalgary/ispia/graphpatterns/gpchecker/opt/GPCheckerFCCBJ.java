@@ -3,23 +3,18 @@ package ca.ucalgary.ispia.graphpatterns.gpchecker.opt;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import ca.ucalgary.ispia.graphpatterns.gpchecker.GPChecker;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ConstraintsChecker;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ReturnStructImpl;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DSAccess;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.tests.Killable;
-import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
+import ca.ucalgary.ispia.graphpatterns.tests.SimInstrument;
 
 /**
  * This class provides the engine for checking if a given graph pattern
@@ -42,6 +37,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	private final VariableOrdering<N> variableOrdering;
 	private final AltStart<N> altStart;
 
+	private SimInstrument<N> overallMeasurements;
 
 	private boolean killed;							//The kill flag.
 
@@ -65,6 +61,8 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.neighbourhoodAccess = neighbourhoodAccess;
 		this.variableOrdering = variableOrdering;
 		this.altStart = altStart;
+		
+		overallMeasurements = new SimInstrument<N>();
 
 	}
 
@@ -186,7 +184,24 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		}
 
 		//Start the search for the remaining nodes
-		check_rec(assignments, candidates, confIn);
+		check_rec(assignments, candidates, confIn, new SimInstrument<N>());
+		
+		if (neighbourhoodAccess instanceof DSAccess){
+			DSAccess temp = (DSAccess) neighbourhoodAccess;
+			Map<Integer, Integer> sizes = temp.getNeighbourhoodSizes();
+			
+			System.out.println("DB Queries:");
+			for (Integer key : sizes.keySet()){
+				System.out.println(key + ", " + sizes.get(key));
+			}
+			
+			System.out.println(overallMeasurements);
+			//Print the Result size
+			if (queryResults != null){
+				System.out.println("Result size=" + queryResults.size());
+			}
+		}
+		
 		return queryResults;
 	}
 
@@ -198,12 +213,11 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 * The recursive step of the GP-Eval algorithm.
 	 * @param assignments The current state of assignments.
 	 * @param candidates The current state of candidates.
-	 * @param confOut Outgoing conflicts. Var v filters/populates the associated list.
 	 * @param confIn Incoming conflicts. Var v is filtered/populated by the associated list. 
 	 * @return
 	 */
 
-	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn){
+	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn, SimInstrument<N> measurements){
 
 		//If the search has been killed, return false
 		if (killed){
@@ -237,8 +251,10 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 		//Pick the next node to assign such that it is populated but not yet assigned 
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
-		consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
-
+		if (consEval != null){
+			consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
+		}
+		
 		//Dead-end flag
 		boolean deadEnd = true;
 		
@@ -286,7 +302,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 			Map<MyNode, Set<MyNode>> confInClone = new HashMap<MyNode, Set<MyNode>>();
 			for (MyNode key : confIn.keySet()){
-				//Get the set of out conflicts
+				//Get the set of in conflicts
 				Set<MyNode> confSet = new HashSet<MyNode>();
 
 				for (MyNode conflict : confIn.get(key)){
@@ -304,7 +320,15 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
-				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone);
+				SimInstrument<N> sim = new SimInstrument<N> (measurements);
+				sim.updateAssignments(assnClone);
+				sim.updateCandidates(candsClone);
+				sim.updateConfIn(confInClone);
+				sim.updateConfOut(confOut);
+				
+				overallMeasurements.update(sim);
+				
+				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone, sim);
 
 				if (killed){
 					return null;

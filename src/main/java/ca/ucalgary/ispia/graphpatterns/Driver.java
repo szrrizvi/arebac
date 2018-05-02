@@ -8,7 +8,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -16,7 +18,9 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
+import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.tests.SimTestGenerator;
+import ca.ucalgary.ispia.graphpatterns.tests.SimTestRunner;
 import ca.ucalgary.ispia.graphpatterns.tests.TxtToGP;
 /**
  * The driver.
@@ -33,15 +37,26 @@ public class Driver {
 		//Driver d = new Driver();
 		//GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 		
+		//saveDataSet("soc-pokec-relationships");
+
 		//graphDb.shutdown();
 		//System.out.println("ENDING");
 		
 		Random rand = new Random(4087955);
 		DataSetWrapper dsw = loadDataSet("Slashdot0902");
 		System.out.println("Done reading");
-		generateSimTests(dsw, "Slashdot0902", rand);
+		//generateSimTests(dsw, "Slashdot0902", rand);
 		
 		//saveDataSet("soc-pokec-relationships");
+		SimTestRunner str = new SimTestRunner(dsw);
+
+		
+		
+		try {
+			str.runTests(5, "simulation-tests/Slashdot0902/");
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -52,6 +67,7 @@ public class Driver {
 		int rooted = 1; 
 		float p = 0.01f; 
 		String nodePrefix = "n";
+		int idx = 0;
 		
 		
 		for (endSize = 6; endSize < 16; endSize = endSize+2){
@@ -71,14 +87,17 @@ public class Driver {
 			}
 			
 			try {
-				FileOutputStream fout = new FileOutputStream("simulation-tests/"+name+"/test+"+endSize+".ser");
+				FileOutputStream fout = new FileOutputStream("simulation-tests/"+name+"/test"+idx+".ser");
 				ObjectOutputStream oos = new ObjectOutputStream(fout);
 				oos.writeObject(list);
 				oos.close();
+				
+				idx++;
+				System.out.println("Completed: " +idx);
 			} catch (IOException e){
 				System.out.println("IOException" + e);
 			}
-			System.out.println("Completed: " +endSize);
+			
 		}
 		
 		

@@ -174,7 +174,7 @@ public class DataSetWrapper{
 		Set<MyNode> nodes = dataSet.getNodes();
 		
 		for (MyNode node : nodes){
-			if (node.getAttribute("id").equals(id)){
+			if (node.getId().equals(id)){
 				return node;
 			}
 		}
