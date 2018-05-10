@@ -2,6 +2,7 @@ package ca.ucalgary.ispia.graphpatterns.tests;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -46,7 +47,7 @@ public class SimTestRunner {
 	 */
 	public void runTests(int numFiles, String path) throws Exception{
 
-		for (int i = 0; i < numFiles; i++){
+		for (int i = 1; i < numFiles; i++){
 			//Read the test cases from the file
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path+"/test"+i+".ser"));
 			List<GPHolder> tests = (List<GPHolder>) ois.readObject();
@@ -54,6 +55,19 @@ public class SimTestRunner {
 			//Execute the tests
 			executeTests(tests);
 		}
+	}
+	
+	public void runTest(String path, int set, int idx) throws Exception{
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path+"/test"+set+".ser"));
+		List<GPHolder> tests = (List<GPHolder>) ois.readObject();
+		ois.close();
+		
+		GPHolder gph = tests.get(idx);
+		System.out.println(gph);
+		
+		List<GPHolder> temp = new ArrayList<GPHolder>();
+		temp.add(gph);
+		executeTests(temp);
 	}
 
 	/**
@@ -66,13 +80,18 @@ public class SimTestRunner {
 			NeighbourhoodAccess<MyNode> neighbourhoodAccess = new DSAccess(dataset);
 			VariableOrdering<MyNode> variableOrdering = new LeastCandidates<MyNode>(test.getGp());
 
-
 			GPCheckerFCCBJ<MyNode, Object> gpFC = new GPCheckerFCCBJ<MyNode, Object>(test, null, neighbourhoodAccess, variableOrdering, null);
 			//Run the algorithm and record the time
+
+			Terminator term = 	new Terminator(gpFC);
+			term.terminateAfter(60000l);
+
+			//System.out.println(test);
+			List<Map<MyNode, MyNode>> result = gpFC.check();
 			
-			//List<Map<MyNode, MyNode>> result = gpFC.check();
-			System.out.println(test);
-			return;
+			//Make sure the terminator is killed
+			term.nullifyObj();
+			term.stop();
 		}
 	}
 

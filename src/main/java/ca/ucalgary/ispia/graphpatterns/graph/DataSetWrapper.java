@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.graphdb.RelationshipType;
+
 /**
  * The DataSet class's only function is to hold the large dataset. Removing all other functionality did 
  * seem to help improve the performance of reading the dataset from txt file and saving as serialized object. 
@@ -74,20 +76,37 @@ public class DataSetWrapper{
 	 * @param dir The direction of relationships
 	 * @return The set of relationships to/from the given node.
 	 */
-	public Set<MyRelationship> getRelationships(MyNode node, MyDirection dir){
+	public Set<MyRelationship> getRelationships(MyNode node, RelationshipType relType, MyDirection dir){
 		
 		//Initialize result list
-		Set<MyRelationship> result = new HashSet<MyRelationship>();	
+		Set<MyRelationship> unfiltered = new HashSet<MyRelationship>();	
 		
 		if (dir == MyDirection.OUTGOING){
 			//Outgoing relationships; node = src
-			result.addAll(dataSet.getOutgoingRels().get(node));
+			Set<MyRelationship> temp =dataSet.getOutgoingRels().get(node);
+			if (temp != null){
+				unfiltered.addAll(temp);
+			}
 		} else if (dir == MyDirection.INCOMING) {
 			//Incoming relationships; node = tgt
-			result.addAll(incomingRels.get(node));
+			Set<MyRelationship> temp = incomingRels.get(node);
+			if (temp != null){
+				unfiltered.addAll(temp);
+			}
 		} else {
 			//Both directions; node = src || node = tgt
-			result = getAllRelationships(node);	
+			Set<MyRelationship> temp = getAllRelationships(node);
+			if (temp != null){
+				unfiltered.addAll(temp);
+			}
+			
+		}
+		
+		Set<MyRelationship> result = new HashSet<MyRelationship>();
+		for (MyRelationship rel : unfiltered){
+			if (rel.getIdentifier().equals(relType)){
+				result.add(rel);
+			}
 		}
 		
 		return result;

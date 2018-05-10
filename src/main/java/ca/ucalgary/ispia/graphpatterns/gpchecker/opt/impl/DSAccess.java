@@ -64,7 +64,8 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
 		//Query the database for the neighbours of vertex, where direction = dir.
 		//Only keep the neighbours where the edge and vertex attributes are satisfied
-		Iterable<MyRelationship> result = dataset.getRelationships(vertex, dir);
+		
+		Iterable<MyRelationship> result = dataset.getRelationships(vertex, rel.getIdentifier(), dir);
 		for (MyRelationship tempR : result){
 			MyNode neighbour = tempR.getOther(vertex);
 			neighbours.add(neighbour);
@@ -104,7 +105,7 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 		boolean retVal = false;
 
 		//Check if the relationship exists between them.
-		Iterator<MyRelationship> relIte = dataset.getRelationships(src, MyDirection.OUTGOING).iterator(); 
+		Iterator<MyRelationship> relIte = dataset.getRelationships(src, rel.getIdentifier(), MyDirection.OUTGOING).iterator(); 
 
 		while (relIte.hasNext()){
 			MyRelationship r = relIte.next();

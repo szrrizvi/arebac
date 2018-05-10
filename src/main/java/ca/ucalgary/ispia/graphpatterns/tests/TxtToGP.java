@@ -4,10 +4,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
-import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.graph.RelType;
@@ -22,7 +22,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.RelType;
  */
 public class TxtToGP {
 
-	public static DataSet readDataSet(String fileName){
+	public static DataSet readDataSet(String fileName, Random random){
 
 		/**
 		 * Prepare to read the source file.
@@ -84,7 +84,8 @@ public class TxtToGP {
 			}
 			
 			//Create the relationship object
-			MyRelationship rel = new MyRelationship(srcNode, tgtNode, RelType.RelA, relCounter+"");
+			RelType relType = randomRelType(random);
+			MyRelationship rel = new MyRelationship(srcNode, tgtNode, relType, relCounter+"");
 			relCounter++;
 			
 			//Add the relationship to the graph pattern
@@ -107,5 +108,13 @@ public class TxtToGP {
 		
 		//Return GP
 		return gp;
+	}
+	
+	private static RelType randomRelType(Random random){
+		RelType[] types = RelType.values();
+		
+		int idx = random.nextInt(types.length);
+		
+		return types[idx];
 	}
 }

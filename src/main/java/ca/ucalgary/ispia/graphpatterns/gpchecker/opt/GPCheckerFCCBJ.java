@@ -218,7 +218,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 */
 
 	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn, SimInstrument<N> measurements){
-
+		
 		//If the search has been killed, return false
 		if (killed){
 			return null;
@@ -468,6 +468,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 */
 	public void kill(){
 		this.killed = true;
+		System.out.println("KILLED");
 	}
 
 
