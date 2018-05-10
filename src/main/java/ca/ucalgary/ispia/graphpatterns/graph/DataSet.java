@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.graphdb.RelationshipType;
+
 /**
  * Represents a graph pattern. The relationships are stored as an adjacency list.
  * @author szrrizvi
@@ -21,6 +23,8 @@ public class DataSet implements Serializable{
 
 	//The list of nodes
 	private Set<MyNode> nodes;
+	
+	private Set<RelationshipType> relTypes;
 
 	/**
 	 * Default constructor.
@@ -29,6 +33,7 @@ public class DataSet implements Serializable{
 		//Initialize the map and the list of nodes
 		outgoingRels = new HashMap<MyNode, Set<MyRelationship>>();
 		nodes = new HashSet<MyNode>();
+		relTypes = new HashSet<RelationshipType>();
 	}
 
 	/**
@@ -94,6 +99,10 @@ public class DataSet implements Serializable{
 			//Put the key, value pair in the map
 			outgoingRels.put(source, list);
 		}
+		
+		if (!relTypes.contains(rel.getIdentifier())){
+			relTypes.add(rel.getIdentifier());
+		}
 
 	}
 
@@ -112,6 +121,10 @@ public class DataSet implements Serializable{
 	 */
 	public Set<MyNode> getNodes(){
 		return nodes;
+	}
+	
+	public Set<RelationshipType> getRelTyeps(){
+		return this.relTypes;
 	}
 	
 	/**

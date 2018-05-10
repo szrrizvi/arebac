@@ -19,14 +19,11 @@ import org.neo4j.graphdb.RelationshipType;
  */
 public class DataSetWrapper{
 
-	private static final long serialVersionUID = 1L;
-	
 	DataSet dataSet;
 
 	//The adjacency list for incoming relationships. The key is a MyNode, and the value is the list of 
 	//relationships where the key is the target node.
 	private Map<MyNode, Set<MyRelationship>> incomingRels;
-	
 	
 	/**
 	 * Default constructor. Initialize instance variables.
