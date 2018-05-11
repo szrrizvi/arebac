@@ -411,18 +411,14 @@ public class SimTestGenerator {
 
 
 		//For each Node object, create an associated MyNode object
-		int z = 0;
+		int nodeCount = 0;
 		for (MyNode n : allNodes){
 
-			MyNode myNode = new MyNode(nodePrefix + Character.toString((char) (97 + z)), "PERSON");
+			MyNode myNode = new MyNode(nodeCount, "PERSON");
 			nodesMap.put(n, myNode);
 			gp.addNode(myNode);
 
-			z++;
-			if (z == 26){
-				z = 0;
-				nodePrefix = nodePrefix+"A";
-			}
+			nodeCount++;
 		}
 
 
@@ -443,7 +439,7 @@ public class SimTestGenerator {
 			MyNode node = allNodesClone.get(idx);
 			MyNode myNode = nodesMap.get(node);
 
-			myNode.addAttribute("id", node.getId());
+			myNode.addAttribute("id", node.getId() + "");
 			//Remove the node from allNodesClone list.
 			allNodesClone.remove(idx);
 		}
@@ -464,7 +460,7 @@ public class SimTestGenerator {
 			target = nodesMap.get(r.getTarget());
 			type = GPUtil.translateRelType(r.getIdentifier());
 
-			MyRelationship rel = new MyRelationship(source, target, type, relPrefix + ((char) (97 + relCount)));
+			MyRelationship rel = new MyRelationship(source, target, type, relCount);
 			relCount++;
 
 			if (relCount >= 25){

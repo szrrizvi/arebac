@@ -36,7 +36,7 @@ public class TxtToGP {
 		}
 		
 		//Map to store the nodes.
-		Map<String, MyNode> nodesMap = new HashMap<String,MyNode>();
+		Map<Integer, MyNode> nodesMap = new HashMap<Integer,MyNode>();
 		
 		//Counters 
 		int relCounter = 0;
@@ -59,8 +59,8 @@ public class TxtToGP {
 			}
 			
 			//Read the IDs for the nodes in the relationship
-			String srcID = relInfo[0];
-			String tgtID = relInfo[1];
+			int srcID = Integer.parseInt(relInfo[0]);
+			int tgtID = Integer.parseInt(relInfo[1]);
 			
 			MyNode srcNode = null;
 			MyNode tgtNode = null;
@@ -85,7 +85,7 @@ public class TxtToGP {
 			
 			//Create the relationship object
 			RelType relType = randomRelType(random);
-			MyRelationship rel = new MyRelationship(srcNode, tgtNode, relType, relCounter+"");
+			MyRelationship rel = new MyRelationship(srcNode, tgtNode, relType, relCounter);
 			relCounter++;
 			
 			//Add the relationship to the graph pattern

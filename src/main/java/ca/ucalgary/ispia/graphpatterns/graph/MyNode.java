@@ -20,7 +20,7 @@ public class MyNode implements HasAttributes, Serializable{
 	
 	
 	//Fields
-	private final String id;
+	private final int id;
 	private final String label;
 	private Map<String, String> attributes;
 	
@@ -29,7 +29,7 @@ public class MyNode implements HasAttributes, Serializable{
 	 * @param id The id
 	 * @param label The node label
 	 */
-	public MyNode(String id, String label){
+	public MyNode(int id, String label){
 		//Set the fields and initialize the atrributes map
 		this.id = id;
 		this.label = label;
@@ -39,7 +39,7 @@ public class MyNode implements HasAttributes, Serializable{
 	/**
 	 * @return the id
 	 */
-	public String getId(){
+	public int getId(){
 		return this.id;
 	}
 	
@@ -114,7 +114,7 @@ public class MyNode implements HasAttributes, Serializable{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + id.hashCode();
+		result = prime * result + id;
 		return result;
 	}
 
@@ -127,7 +127,7 @@ public class MyNode implements HasAttributes, Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		MyNode other = (MyNode) obj;
-		if (!id.equals(other.getId()))
+		if (id != (other.getId()))
 			return false;
 		return true;
 	}

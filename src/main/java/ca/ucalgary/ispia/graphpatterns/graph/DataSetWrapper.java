@@ -186,11 +186,11 @@ public class DataSetWrapper{
 		return degree;
 	}
 	
-	public MyNode findNode(String id){
+	public MyNode findNode(int id){
 		Set<MyNode> nodes = dataSet.getNodes();
 		
 		for (MyNode node : nodes){
-			if (node.getId().equals(id)){
+			if (node.getId() == (id)){
 				return node;
 			}
 		}

@@ -20,7 +20,7 @@ public class MyRelationship implements HasAttributes, Serializable {
 	private final MyNode source;
 	private final MyNode target;
 	private final RelType identifier;
-	private final String id;
+	private final int id;
 	private Map<String, String> attributes;
 	
 	/**
@@ -29,7 +29,7 @@ public class MyRelationship implements HasAttributes, Serializable {
 	 * @param target The target node
 	 * @param identifier The relation identifier
 	 */
-	public MyRelationship(MyNode source, MyNode target, RelType identifier, String id){
+	public MyRelationship(MyNode source, MyNode target, RelType identifier, int id){
 		//Set the fields
 		this.source = source;
 		this.target = target;
@@ -55,11 +55,11 @@ public class MyRelationship implements HasAttributes, Serializable {
 	/**
 	 * @return The relation identifier
 	 */
-	public RelationshipType getIdentifier() {
+	public RelType getIdentifier() {
 		return identifier;
 	}
 	
-	public String getId(){
+	public int getId(){
 		return this.id;
 	}
 

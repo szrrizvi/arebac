@@ -219,7 +219,7 @@ public class EvalTestGenWrapper {
 		//The mapping from the original nodes to the new nodes
 		Map<MyNode, MyNode> nodesMap = new HashMap<MyNode, MyNode>();
 
-		int z = 0;
+		int nodeCount = 0;
 		int relCount = 0;
 		String nodePrefix = "C";
 		String relPrefix = "rel";
@@ -229,12 +229,9 @@ public class EvalTestGenWrapper {
 		//For each seed, create a single node and map the nodes from the input GPs to the new node
 		for (Node n : seeds){
 			//Create the new node
-			MyNode newNode = new MyNode(nodePrefix + Character.toString((char) (97 + z)), "PERSON");
-			z++;
-			if (z == 26){
-				z = 0;
-				nodePrefix = nodePrefix+"A";
-			}
+			MyNode newNode = new MyNode(nodeCount, "PERSON");
+			nodeCount++;
+			
 
 			//Add it to the nodes list
 			nodes.add(newNode);
@@ -265,12 +262,9 @@ public class EvalTestGenWrapper {
 		for (MyNode node : gpA.getNodes()){
 			if (!seenNodes.contains(node)){
 				//Create the node
-				MyNode newNode = new MyNode(nodePrefix + Character.toString((char) (97 + z)), "PERSON");
-				z++;
-				if (z == 26){
-					z = 0;
-					nodePrefix = nodePrefix+"A";
-				}
+				MyNode newNode = new MyNode(nodeCount, "PERSON");
+				nodeCount++;
+				
 
 				//Update the mapping
 				nodesMap.put(node, newNode);
@@ -284,13 +278,9 @@ public class EvalTestGenWrapper {
 		for (MyNode node : gpB.getNodes()){
 			if (!seenNodes.contains(node)){
 				//Create the node
-				MyNode newNode = new MyNode(nodePrefix + Character.toString((char) (97 + z)), "PERSON");
-				z++;
-				if (z == 26){
-					z = 0;
-					nodePrefix = nodePrefix+"A";
-				}
-
+				MyNode newNode = new MyNode(nodeCount, "PERSON");
+				nodeCount++;
+				
 				//Update the mapping
 				nodesMap.put(node, newNode);
 				seenNodes.add(node);
@@ -311,7 +301,7 @@ public class EvalTestGenWrapper {
 			MyNode tgt = nodesMap.get(rel.getTarget());
 			RelType type = GPUtil.translateRelType(rel.getIdentifier());
 			//Generate the relationships
-			MyRelationship r = new MyRelationship(src, tgt, type, relPrefix + ((char) (97 + relCount)));
+			MyRelationship r = new MyRelationship(src, tgt, type, relCount);
 			relCount++;
 			
 			if (relCount == 26){
@@ -330,7 +320,7 @@ public class EvalTestGenWrapper {
 			MyNode tgt = nodesMap.get(rel.getTarget());
 			RelType type = GPUtil.translateRelType(rel.getIdentifier());
 			//Generate the relationships
-			MyRelationship r = new MyRelationship(src, tgt, type, relPrefix + ((char) (97 + relCount)));
+			MyRelationship r = new MyRelationship(src, tgt, type, relCount);
 			relCount++;
 
 			if (relCount == 26){

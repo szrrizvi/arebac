@@ -1,15 +1,13 @@
 package ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
-import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
 import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
@@ -22,7 +20,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 
 public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
-	private DataSetWrapper dataset;
+	private DataSetInterface dataset;
 	private Map<Integer, Integer> neighbourhoodSizes; 
 
 	
@@ -32,7 +30,7 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 	 * @param graphDb The GraphDatabaseService
 	 * @param constraintsChecker The ConstraintsChecker
 	 */
-	public DSAccess (DataSetWrapper dataset){
+	public DSAccess (DataSetInterface dataset){
 		//Initialize the instance variables
 		this.dataset = dataset;
 		neighbourhoodSizes = new HashMap<Integer, Integer>();
@@ -90,7 +88,7 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
 	@Override
 	public MyNode findNode(MyNode src, Integer id) {
-		MyNode tgt = dataset.findNode(src.getAttribute("id"));
+		MyNode tgt = dataset.findNode(src.getId());
 
 		if (tgt == null){
 			//If the node is not found, return null

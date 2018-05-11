@@ -436,18 +436,14 @@ public class EvalTestGenerator {
 
 
 		//For each Node object, create an associated MyNode object
-		int z = 0;
+		int nodeCount = 0;
 		for (Node n : allNodes){
 
-			MyNode myNode = new MyNode(nodePrefix + Character.toString((char) (97 + z)), "PERSON");
+			MyNode myNode = new MyNode(nodeCount, "PERSON");
 			nodesMap.put(n, myNode);
 			gp.addNode(myNode);
 			
-			z++;
-			if (z == 26){
-				z = 0;
-				nodePrefix = nodePrefix+"A";
-			}
+			nodeCount++;
 		}
 
 
@@ -499,9 +495,9 @@ public class EvalTestGenerator {
 				tx.success();
 			}
 
-			MyRelationship rel = new MyRelationship(source, target, type, relPrefix + ((char) (97 + relCount)));
+			MyRelationship rel = new MyRelationship(source, target, type, relCount);
 			relCount++;
-			MyRelationship relOpp = new MyRelationship(target, source, type, relPrefix + ((char) (97 + relCount)));
+			MyRelationship relOpp = new MyRelationship(target, source, type, relCount);
 			relCount++;
 			
 			if (relCount >= 25){

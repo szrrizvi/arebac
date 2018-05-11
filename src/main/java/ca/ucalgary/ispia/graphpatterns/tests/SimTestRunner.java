@@ -13,7 +13,7 @@ import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.VariableOrdering;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DSAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
-import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 
@@ -24,13 +24,13 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
  */
 public class SimTestRunner {
 
-	private DataSetWrapper dataset;
+	private DataSetInterface dataset;
 
 	/**
 	 * Constructor. Initialize the data set wrapper
 	 * @param graphDb
 	 */
-	public SimTestRunner(DataSetWrapper dataset){
+	public SimTestRunner(DataSetInterface dataset){
 		this.dataset = dataset;
 	}
 

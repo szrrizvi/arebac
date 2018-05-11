@@ -99,10 +99,6 @@ public class DataSet implements Serializable{
 			//Put the key, value pair in the map
 			outgoingRels.put(source, list);
 		}
-		
-		if (!relTypes.contains(rel.getIdentifier())){
-			relTypes.add(rel.getIdentifier());
-		}
 
 	}
 
@@ -121,6 +117,10 @@ public class DataSet implements Serializable{
 	 */
 	public Set<MyNode> getNodes(){
 		return nodes;
+	}
+	
+	public void setRelationshipTypes(Set<RelationshipType> relTypes){
+		this.relTypes = relTypes;
 	}
 	
 	public Set<RelationshipType> getRelTyeps(){
