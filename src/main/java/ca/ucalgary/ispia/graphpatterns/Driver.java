@@ -14,6 +14,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.tests.SimTestGenerator;
@@ -42,8 +43,8 @@ public class Driver {
 		generateSimTests(dsw, "Slashdot0902", rand);
 		*/
 		
-		DataSetWrapper dsw = loadDataSet("Slashdot0902");
-		SimTestRunner str = new SimTestRunner(dsw);
+		DataSetInterface dsi = loadDataSet("Slashdot0902");
+		SimTestRunner str = new SimTestRunner(dsi);
 		try {
 			str.runTest("simulation-tests/Slashdot0902", 1, 10);
 			//str.runTests(5, "simulation-tests/Slashdot0902");
@@ -97,7 +98,7 @@ public class Driver {
 
 	}
 
-	private static DataSetWrapper loadDataSet(String fileName){
+	private static DataSetInterface loadDataSet(String fileName){
 
 		DataSet dataSet = null;
 
@@ -112,8 +113,8 @@ public class Driver {
 			e.printStackTrace();
 		}
 
-		DataSetWrapper dsw = new DataSetWrapper(dataSet);
-		return dsw;
+		DataSetInterface dsi = new DataSetInterface(dataSet);
+		return dsi;
 	}
 
 	private static void saveDataSet(String fileName, Random random){
