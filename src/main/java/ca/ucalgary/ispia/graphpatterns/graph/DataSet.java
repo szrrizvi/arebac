@@ -123,7 +123,7 @@ public class DataSet implements Serializable{
 		this.relTypes = relTypes;
 	}
 	
-	public Set<RelationshipType> getRelTyeps(){
+	public Set<RelationshipType> getRelTypes(){
 		return this.relTypes;
 	}
 	

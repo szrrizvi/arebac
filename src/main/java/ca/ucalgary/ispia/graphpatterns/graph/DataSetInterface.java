@@ -13,7 +13,7 @@ public class DataSetInterface {
 	public DataSetInterface(DataSet dataSet){
 
 		int numNodes = dataSet.getNodes().size();
-		int numRelTypes = dataSet.getRelTyeps().size();
+		int numRelTypes = dataSet.getRelTypes().size();
 		matrixOut = new HashSet[numNodes][numRelTypes];
 		matrixIn = new HashSet[numNodes][numRelTypes];
 		nodes = new MyNode[numNodes];

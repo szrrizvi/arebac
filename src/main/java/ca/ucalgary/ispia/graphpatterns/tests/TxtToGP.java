@@ -3,9 +3,13 @@ package ca.ucalgary.ispia.graphpatterns.tests;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
+
+import org.neo4j.graphdb.RelationshipType;
 
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
@@ -44,7 +48,7 @@ public class TxtToGP {
 		int progressNext = 0;
 		
 		//The graph pattern
-		DataSet gp = new DataSet();
+		DataSet dataset = new DataSet();
 		
 		while (scan.hasNext()){
 			
@@ -89,7 +93,7 @@ public class TxtToGP {
 			relCounter++;
 			
 			//Add the relationship to the graph pattern
-			gp.addRelationship(rel);
+			dataset.addRelationship(rel);
 			
 			//Update progress counter
 			progressNext++;
@@ -104,10 +108,21 @@ public class TxtToGP {
 		scan.close();
 		
 		//Print GP size
-		System.out.println("Nodes: " + gp.getNodes().size());
+		System.out.println("Nodes: " + dataset.getNodes().size());
 		
-		//Return GP
-		return gp;
+		Set<RelationshipType> relTypes = new HashSet<RelationshipType>();
+		relTypes.add(RelType.RelA);
+		relTypes.add(RelType.RelB);
+		relTypes.add(RelType.RelC);
+		relTypes.add(RelType.RelD);
+		relTypes.add(RelType.RelE);
+		relTypes.add(RelType.RelF);
+		relTypes.add(RelType.RelG);
+		
+		dataset.setRelationshipTypes(relTypes);
+		
+		//Return dataset
+		return dataset;
 	}
 	
 	private static RelType randomRelType(Random random){
