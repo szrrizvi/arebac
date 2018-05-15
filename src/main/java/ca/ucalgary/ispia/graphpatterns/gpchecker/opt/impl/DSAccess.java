@@ -50,7 +50,6 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 	public Set<MyNode> findNeighbours(MyRelationship rel, MyNode node, MyNode vertex){
 		
 		long start = System.nanoTime();
-		
 		//Setup the checking step
 		Set<MyNode> neighbours = new HashSet<MyNode>();					//The list containing the result
 

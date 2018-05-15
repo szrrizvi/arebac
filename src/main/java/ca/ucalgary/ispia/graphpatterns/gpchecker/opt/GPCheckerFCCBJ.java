@@ -224,7 +224,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 */
 
 	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn, SimInstrument<N> measurements){
-		
 		//If the search has been killed, return false
 		if (killed){
 			return null;
@@ -268,14 +267,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Set<MyNode> jumpStack = new HashSet<MyNode>();
 		
-		/*System.out.println("CANDIDATES");
-		for (MyNode key : candidates.keySet()){
-			System.out.print(key.getId() + ": ");
-			for (Node n : candidates.get(key)){
-				System.out.print(n.getId() + ", ");
-			}
-			System.out.println();
-		}*/
+		System.out.println(nextNode + ", " + candidates.get(nextNode).size());
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
@@ -284,13 +276,11 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
+			
 			for (MyNode key : candidates.keySet()){
 				//Get the set of candidates
 				Set<N> candidatesSet = new HashSet<N>(); 
-
-				for (N candidate : candidates.get(key)){
-					candidatesSet.add(candidate);
-				}
+				candidatesSet.addAll(candidates.get(key));
 				candsClone.put(key, candidatesSet);
 			}
 
@@ -310,10 +300,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			for (MyNode key : confIn.keySet()){
 				//Get the set of in conflicts
 				Set<MyNode> confSet = new HashSet<MyNode>();
-
-				for (MyNode conflict : confIn.get(key)){
-					confSet.add(conflict);
-				}
+				confSet.addAll(confIn.get(key));
 				confInClone.put(key, confSet);
 			}
 
@@ -327,12 +314,12 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
 				SimInstrument<N> sim = new SimInstrument<N> ();//measurements);
-				sim.updateAssignments(assnClone);
+				/*sim.updateAssignments(assnClone);
 				sim.updateCandidates(candsClone);
 				sim.updateConfIn(confInClone);
 				sim.updateConfOut(confOut);
 				
-				overallMeasurements.update(sim);
+				overallMeasurements.update(sim);*/
 				
 				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone, sim);
 
@@ -349,15 +336,10 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 					} else {
 						//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
 						//When we return from this call stack, we will return using jumpStack.
+						System.out.println("PAUSED G");
 						jumpStack.addAll(jumpNodes);
 					}
 				}
-
-				//if (rs != null && 
-				//		rs.isJumpingForJoy() && 
-				//		!rs.getJumpVariables().contains(nextNode)){
-				//	return rs;
-				//}
 			}
 		}
 
@@ -382,11 +364,11 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 * @return
 	 */
 	private boolean populateFilter(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
-
+		
 		N vertex = assignments.get(node);
 		//Get all of the relationships from GP that contain the given node.
 		List<MyRelationship> rels = gp.getAllRelationships(node);
-
+		
 		//Iterate through the relationships
 		for (MyRelationship rel : rels){
 			//Record the other node (from the perspective of the given node)
