@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.neo4j.graphdb.RelationshipType;
 
 public enum RelType implements RelationshipType, Serializable{
-	RelA(1), RelB(2), RelC(3), RelD(4), RelE(5), RelF(6), RelG(7);
+	RelA(0), RelB(1), RelC(2), RelD(3), RelE(4), RelF(5), RelG(6);
 	
 	private final int idx;
 	

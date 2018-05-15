@@ -48,7 +48,9 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 	 * @return The set of neighbours that satisfy the associated constraints.
 	 */
 	public Set<MyNode> findNeighbours(MyRelationship rel, MyNode node, MyNode vertex){
-
+		
+		long start = System.nanoTime();
+		
 		//Setup the checking step
 		Set<MyNode> neighbours = new HashSet<MyNode>();					//The list containing the result
 
@@ -77,7 +79,12 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 		} else {
 			neighbourhoodSizes.put(size, 1);
 		}
+		
+		long end = System.nanoTime();
+		
+		System.out.println("Query time: " + (end-start));
 
+		
 		return neighbours;
 	}
 
@@ -88,7 +95,7 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
 	@Override
 	public MyNode findNode(MyNode src, Integer id) {
-		MyNode tgt = dataset.findNode(src.getId());
+		MyNode tgt = dataset.findNode(id);
 
 		if (tgt == null){
 			//If the node is not found, return null

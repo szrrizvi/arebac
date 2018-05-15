@@ -110,6 +110,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			if (vertex != null){
 				assignments.put(node, vertex);
 			} else {
+				System.out.println("HERE A");
 				return null;
 			}
 			
@@ -142,6 +143,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				if (vertex != null){
 					assignments.put(node, vertex);
 				} else {
+					System.out.println("HERE B");
 					return null;
 				}				
 			}
@@ -149,6 +151,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//Check the direct relationships between the fixed nodes
 		if (!preCheck(assignments)){
 			//If the precheck fails, then return false.
+			System.out.println("HERE C");
 			return null;
 		}
 
@@ -159,6 +162,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//Populate and filter the immediate neighbours of the fixed nodes
 		for (MyNode key : assignments.keySet()){
 			if (!populateFilter(assignments, candidates, key, confOut, confIn)){
+				System.out.println("HERE D");
 				return null;
 			}
 		}
@@ -167,6 +171,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//populate the candidates map based on the attributes.
 		if (candidates.isEmpty()){
 			if (!altStart.startPop(gp.getNodes(), candidates)){
+				System.out.println("HERE E");
 				return null;
 			}/* else {
 				for (MyNode key : assignments.keySet()){
@@ -180,13 +185,14 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//If the candidates map is still empty, even after populating it through
 		//alternat start, then return null as we have no starting point.
 		if (candidates.isEmpty()){
+			System.out.println("HERE F");
 			return null;
 		}
 
 		//Start the search for the remaining nodes
 		check_rec(assignments, candidates, confIn, new SimInstrument<N>());
 		
-		if (neighbourhoodAccess instanceof DSAccess){
+		/*if (neighbourhoodAccess instanceof DSAccess){
 			DSAccess temp = (DSAccess) neighbourhoodAccess;
 			Map<Integer, Integer> sizes = temp.getNeighbourhoodSizes();
 			
@@ -200,7 +206,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			if (queryResults != null){
 				System.out.println("Result size=" + queryResults.size());
 			}
-		}
+		}*/
 		
 		return queryResults;
 	}
@@ -244,7 +250,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			if (!queryResults.contains(result)){
 				queryResults.add(result);
 			}
-			return new HashSet<MyNode>(gph.getResultSchema());
+			return new HashSet<MyNode>();
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
@@ -320,7 +326,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
-				SimInstrument<N> sim = new SimInstrument<N> (measurements);
+				SimInstrument<N> sim = new SimInstrument<N> ();//measurements);
 				sim.updateAssignments(assnClone);
 				sim.updateCandidates(candsClone);
 				sim.updateConfIn(confInClone);
@@ -412,7 +418,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				if (candidates.get(otherNode).isEmpty()){
 
 					confOut.add(otherNode);
-
+					System.out.println("FAILED: " + node.getId() + ", " + assignments.get(node));
 					return false;
 				}
 			}

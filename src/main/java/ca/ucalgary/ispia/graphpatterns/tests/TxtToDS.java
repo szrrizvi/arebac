@@ -24,7 +24,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.RelType;
  * @author rizvi
  *
  */
-public class TxtToGP {
+public class TxtToDS {
 
 	public static DataSet readDataSet(String fileName, Random random){
 
@@ -110,6 +110,7 @@ public class TxtToGP {
 		//Print GP size
 		System.out.println("Nodes: " + dataset.getNodes().size());
 		
+		//Add the relationship types
 		Set<RelationshipType> relTypes = new HashSet<RelationshipType>();
 		relTypes.add(RelType.RelA);
 		relTypes.add(RelType.RelB);

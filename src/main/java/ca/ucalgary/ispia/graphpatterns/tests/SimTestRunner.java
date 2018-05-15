@@ -47,7 +47,7 @@ public class SimTestRunner {
 	 */
 	public void runTests(int numFiles, String path) throws Exception{
 
-		for (int i = 1; i < numFiles; i++){
+		for (int i = 0; i < numFiles; i++){
 			//Read the test cases from the file
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path+"/test"+i+".ser"));
 			List<GPHolder> tests = (List<GPHolder>) ois.readObject();
@@ -86,12 +86,20 @@ public class SimTestRunner {
 			Terminator term = 	new Terminator(gpFC);
 			term.terminateAfter(60000l);
 
-			//System.out.println(test);
+			long start = System.nanoTime();
 			List<Map<MyNode, MyNode>> result = gpFC.check();
+			long end = System.nanoTime();
 			
 			//Make sure the terminator is killed
 			term.nullifyObj();
 			term.stop();
+			
+			if (result != null){
+				System.out.print("Size: " + result.size());
+			} else {
+				System.out.print("Result NULL");
+			}
+			System.out.println(", Time: " + (end-start));
 		}
 	}
 

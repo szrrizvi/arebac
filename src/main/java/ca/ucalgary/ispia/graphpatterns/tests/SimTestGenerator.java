@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
-import ca.ucalgary.ispia.graphpatterns.graph.MyDirection;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.graph.RelType;
@@ -30,7 +30,7 @@ public class SimTestGenerator {
 	private String nodePrefix;				//The prefix for the node names
 
 	private Random random;					//Random number generator
-	private DataSetWrapper dataSet;			//graph dataset
+	private DataSetInterface dataSet;			//graph dataset
 	private float p;						//probability to keep a relationship
 
 	private List<MyRelationship> rels;			//List of relationships for GP
@@ -57,7 +57,7 @@ public class SimTestGenerator {
 	 * @param p	The probability to keep a relationship
 	 * @param nodePrefix The prefix for the node names
 	 */
-	public SimTestGenerator(DataSetWrapper dataSet, Random random, int endSize, double complete,  int rooted, float p, String nodePrefix){
+	public SimTestGenerator(DataSetInterface dataSet, Random random, int endSize, double complete,  int rooted, float p, String nodePrefix){
 
 		//Set the graphdb and the random number generator
 		this.dataSet = dataSet;
@@ -262,17 +262,16 @@ public class SimTestGenerator {
 	 */
 	private MyNode pickRandomNode(){
 
-		Set<MyNode> nodes = dataSet.getNodes();
-		int rand = random.nextInt(nodes.size());
-
-		Iterator<MyNode> ite = nodes.iterator();
-		int count = 0;
-		while (count < rand){
-			count++;
-			ite.next();
+		MyNode[] nodes = dataSet.getNodes();
+		
+		MyNode node = null;
+		
+		while (node == null){
+			int randVal = random.nextInt(nodes.length);
+			node = nodes[randVal];
 		}
 
-		return ite.next();
+		return node;
 
 	}
 
