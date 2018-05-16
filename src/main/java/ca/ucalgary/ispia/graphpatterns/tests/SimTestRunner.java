@@ -83,16 +83,16 @@ public class SimTestRunner {
 			GPCheckerFCCBJ<MyNode, Object> gpFC = new GPCheckerFCCBJ<MyNode, Object>(test, null, neighbourhoodAccess, variableOrdering, null);
 			//Run the algorithm and record the time
 
-			Terminator term = 	new Terminator(gpFC);
-			term.terminateAfter(60000l);
+			//Terminator term = 	new Terminator(gpFC);
+			//term.terminateAfter(60000l);
 
 			long start = System.nanoTime();
 			List<Map<MyNode, MyNode>> result = gpFC.check();
 			long end = System.nanoTime();
 			
 			//Make sure the terminator is killed
-			term.nullifyObj();
-			term.stop();
+			//term.nullifyObj();
+			//term.stop();
 			
 			if (result != null){
 				System.out.print("Size: " + result.size());

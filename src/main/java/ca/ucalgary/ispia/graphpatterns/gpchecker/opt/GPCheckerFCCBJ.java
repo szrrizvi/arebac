@@ -249,7 +249,9 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			if (!queryResults.contains(result)){
 				queryResults.add(result);
 			}
-			return new HashSet<MyNode>();
+			Set<MyNode> res = new HashSet<MyNode>();
+			res.addAll(new HashSet<MyNode>());
+			return res;
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
