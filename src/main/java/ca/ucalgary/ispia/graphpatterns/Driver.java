@@ -15,6 +15,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.tests.SimTestGenerator;
@@ -139,7 +140,7 @@ public class Driver {
 
 	}
 
-	private static void generateSimTests(DataSetInterface dsi, String name, Random rand){
+	private static void generateSimTests(DataSetWrapper dsw, String name, Random rand){
 
 		int endSize = 6;
 		double complete = 0.4d;
@@ -159,7 +160,7 @@ public class Driver {
 			for (int count = 0; count < 1000; count++){
 				GPHolder gph = null;
 				while (gph == null){
-					SimTestGenerator stg = new SimTestGenerator(dsi, rand, endSize, complete,  rooted, p, nodePrefix);
+					SimTestGenerator stg = new SimTestGenerator(dsw, rand, endSize, complete,  rooted, p, nodePrefix);
 					gph = stg.createDBBasedGP();
 				}
 				list.add(gph);

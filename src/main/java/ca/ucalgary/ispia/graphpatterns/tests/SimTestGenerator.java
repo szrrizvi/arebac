@@ -30,7 +30,7 @@ public class SimTestGenerator {
 	private String nodePrefix;				//The prefix for the node names
 
 	private Random random;					//Random number generator
-	private DataSetInterface dataSet;			//graph dataset
+	private DataSetWrapper dataSet;			//graph dataset
 	private float p;						//probability to keep a relationship
 
 	private List<MyRelationship> rels;			//List of relationships for GP
@@ -57,7 +57,7 @@ public class SimTestGenerator {
 	 * @param p	The probability to keep a relationship
 	 * @param nodePrefix The prefix for the node names
 	 */
-	public SimTestGenerator(DataSetInterface dataSet, Random random, int endSize, double complete,  int rooted, float p, String nodePrefix){
+	public SimTestGenerator(DataSetWrapper dataSet, Random random, int endSize, double complete,  int rooted, float p, String nodePrefix){
 
 		//Set the graphdb and the random number generator
 		this.dataSet = dataSet;
@@ -261,8 +261,9 @@ public class SimTestGenerator {
 	 * @return A random node from the dataset
 	 */
 	private MyNode pickRandomNode(){
-
-		MyNode[] nodes = dataSet.getNodes();
+		
+		MyNode[] nodes = new MyNode[dataSet.getNodes().size()];
+		nodes = dataSet.getNodes().toArray(nodes);
 		
 		MyNode node = null;
 		

@@ -6,8 +6,8 @@ import java.util.Set;
 
 
 public class DataSetInterface {
-	private Set<MyRelationship>[][] matrixOut;
-	private Set<MyRelationship>[][] matrixIn;
+	private Set<MyNode>[][] matrixOut;
+	private Set<MyNode>[][] matrixIn;
 	private MyNode[] nodes;
 
 	public DataSetInterface(DataSet dataSet){
@@ -44,26 +44,27 @@ public class DataSetInterface {
 				int relIdIdx = rel.getIdentifier().getIdx();
 				
 				if (matrixOut[srcNodeIdx][relIdIdx] == null){
-					matrixOut[srcNodeIdx][relIdIdx] = new HashSet<MyRelationship>();
+					matrixOut[srcNodeIdx][relIdIdx] = new HashSet<MyNode>();
 				}
 				if (matrixIn[tgtNodeIdx][relIdIdx] == null){
-					matrixIn[tgtNodeIdx][relIdIdx] = new HashSet<MyRelationship>();
+					matrixIn[tgtNodeIdx][relIdIdx] = new HashSet<MyNode>();
 				}
 				
-				matrixOut[srcNodeIdx][relIdIdx].add(rel);
-				matrixIn[tgtNodeIdx][relIdIdx].add(rel);
+				matrixOut[srcNodeIdx][relIdIdx].add(rel.getTarget());
+				matrixIn[tgtNodeIdx][relIdIdx].add(key);
 			}
 		}
 	}
 	
 	/**
-	 * Returns the set of relationships from the given node, based on the given direction.
+	 * Returns the set of neighbours from the given node, based on the given relType and direction.
 	 * @param node The node
+	 * @param relType
 	 * @param dir The direction of relationships
-	 * @return The set of relationships to/from the given node.
+	 * @return The set of neighbours to/from the given node.
 	 */
-	public Set<MyRelationship> getRelationships(MyNode node, RelType relType, MyDirection dir){
-		Set<MyRelationship> temp;
+	public Set<MyNode> getNeighbours(MyNode node, RelType relType, MyDirection dir){
+		Set<MyNode> temp;
 		
 		if (dir == MyDirection.OUTGOING){
 			//Outgoing relationships; node = src
@@ -73,12 +74,12 @@ public class DataSetInterface {
 			temp =  matrixIn[node.getId()][relType.getIdx()];
 		} else {
 			//Both directions; node = src || node = tgt
-			temp = new HashSet<MyRelationship>();
+			temp = new HashSet<MyNode>();
 			temp.addAll(matrixOut[node.getId()][relType.getIdx()]);
 			temp.addAll(matrixIn[node.getId()][relType.getIdx()]);
 		}
 		if (temp == null){
-			temp = new HashSet<MyRelationship>();
+			temp = new HashSet<MyNode>();
 		}
 		return temp;
 		
@@ -90,10 +91,10 @@ public class DataSetInterface {
 	 * @param node The node
 	 * @return all of the relationships in the graph pattern that contain the given node
 	 */
-	public Set<MyRelationship> getAllRelationships(MyNode node){
+	public Set<MyNode> getAllNeighbours(MyNode node){
 		
 		//Initialize result list
-		Set<MyRelationship> result = new HashSet<MyRelationship>();
+		Set<MyNode> result = new HashSet<MyNode>();
 
 		if (node == null){
 			return result;
