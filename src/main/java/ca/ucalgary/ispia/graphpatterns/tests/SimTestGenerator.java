@@ -331,7 +331,6 @@ public class SimTestGenerator {
 
 
 					//If the neighbour hasn't been seen before, add it to allNodes and nodePool.
-
 					MyNode other = r.getOther(node);
 					if (!allNodes.contains(other)){
 						allNodes.add(other);
@@ -446,8 +445,6 @@ public class SimTestGenerator {
 
 		int relCount = 0;
 
-		String relPrefix = "rel";
-
 		for (MyRelationship r : rels){
 
 			MyNode source = null, target = null;
@@ -462,11 +459,6 @@ public class SimTestGenerator {
 
 			MyRelationship rel = new MyRelationship(source, target, type, relCount);
 			relCount++;
-
-			if (relCount >= 25){
-				relCount = 0;
-				relPrefix = relPrefix + "l";
-			}
 
 			if (!source.equals(target)){
 				gp.addRelationship(rel);

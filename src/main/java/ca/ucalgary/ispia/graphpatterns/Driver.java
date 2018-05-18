@@ -49,14 +49,15 @@ public class Driver {
 
 
 		//saveDataSet("Slashdot0902", rand);
-		DataSetInterface dsi = loadDataSet("Slashdot0902");
+		DataSetInterface dsi = new DataSetInterface(loadDataSet("Slashdot0902"));
+		//DataSetWrapper dsw = new DataSetWrapper(loadDataSet("Slashdot0902"));
 		//dsStats(dsi);
-		//generateSimTests(dsi, "Slashdot0902", rand);
+		//generateSimTests(dsw, "Slashdot0902", rand);
 
 		SimTestRunner str = new SimTestRunner(dsi);
 		try {
-			str.runTest("simulation-tests/Slashdot0902", 0, 0);
-			//str.runTests(5, "simulation-tests/Slashdot0902");
+			//str.runTest("simulation-tests/Slashdot0902", 0, 12);
+			str.runTests(5, "simulation-tests/Slashdot0902");
 		} catch (Exception e){
 			e.printStackTrace();
 		}
@@ -183,7 +184,7 @@ public class Driver {
 
 	}
 
-	private static DataSetInterface loadDataSet(String fileName){
+	private static DataSet loadDataSet(String fileName){
 
 		DataSet dataSet = null;
 
@@ -198,8 +199,8 @@ public class Driver {
 			e.printStackTrace();
 		}
 
-		DataSetInterface dsi = new DataSetInterface(dataSet);
-		return dsi;
+		
+		return dataSet;
 	}
 
 	private static void saveDataSet(String fileName, Random random){

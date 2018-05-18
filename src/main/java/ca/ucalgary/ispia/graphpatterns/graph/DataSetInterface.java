@@ -64,26 +64,29 @@ public class DataSetInterface {
 	 * @return The set of neighbours to/from the given node.
 	 */
 	public Set<MyNode> getNeighbours(MyNode node, RelType relType, MyDirection dir){
-		Set<MyNode> temp;
+		Set<MyNode> temp = new HashSet<MyNode>();
 		
 		if (dir == MyDirection.OUTGOING){
 			//Outgoing relationships; node = src
-			temp =  matrixOut[node.getId()][relType.getIdx()];
+			if (matrixOut[node.getId()][relType.getIdx()] != null){
+				temp.addAll(matrixOut[node.getId()][relType.getIdx()]);
+			}
 		} else if (dir == MyDirection.INCOMING) {
 			//Incoming relationships; node = tgt
-			temp =  matrixIn[node.getId()][relType.getIdx()];
+			if (matrixIn[node.getId()][relType.getIdx()] != null){
+				temp.addAll(matrixIn[node.getId()][relType.getIdx()])  ;
+			}
 		} else {
 			//Both directions; node = src || node = tgt
-			temp = new HashSet<MyNode>();
-			temp.addAll(matrixOut[node.getId()][relType.getIdx()]);
-			temp.addAll(matrixIn[node.getId()][relType.getIdx()]);
-		}
-		if (temp == null){
-			temp = new HashSet<MyNode>();
+			
+			if (matrixOut[node.getId()][relType.getIdx()] != null){
+				temp.addAll(matrixOut[node.getId()][relType.getIdx()]);
+			}
+			if (matrixIn[node.getId()][relType.getIdx()] != null){
+				temp.addAll(matrixIn[node.getId()][relType.getIdx()])  ;
+			}
 		}
 		return temp;
-		
-		
 	}
 	
 	/**

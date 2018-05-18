@@ -49,7 +49,7 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 	 */
 	public Set<MyNode> findNeighbours(MyRelationship rel, MyNode node, MyNode vertex){
 		
-		long start = System.nanoTime();
+		//long start = System.nanoTime();
 		//Setup the checking step
 		Set<MyNode> neighbours = new HashSet<MyNode>();					//The list containing the result
 
@@ -66,7 +66,7 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 		
 		Set<MyNode> result = dataset.getNeighbours(vertex, rel.getIdentifier(), dir);
 		
-		int size = neighbours.size();
+		int size = result.size();
 		if (neighbourhoodSizes.containsKey(size)){
 			int val = neighbourhoodSizes.get(size)+1;
 			neighbourhoodSizes.put(size, val);
@@ -74,12 +74,12 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 			neighbourhoodSizes.put(size, 1);
 		}
 		
-		long end = System.nanoTime();
+		//long end = System.nanoTime();
 		
-		System.out.println("Query time: " + (end-start));
+		//System.out.println("Query time: " + (end-start));
 
 		
-		return neighbours;
+		return result;
 	}
 
 	@Override

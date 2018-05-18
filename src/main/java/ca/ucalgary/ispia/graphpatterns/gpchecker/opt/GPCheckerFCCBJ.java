@@ -110,7 +110,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			if (vertex != null){
 				assignments.put(node, vertex);
 			} else {
-				System.out.println("HERE A");
+				//System.out.println("HERE A");
 				return null;
 			}
 			
@@ -143,7 +143,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				if (vertex != null){
 					assignments.put(node, vertex);
 				} else {
-					System.out.println("HERE B");
+					//System.out.println("HERE B");
 					return null;
 				}				
 			}
@@ -151,7 +151,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//Check the direct relationships between the fixed nodes
 		if (!preCheck(assignments)){
 			//If the precheck fails, then return false.
-			System.out.println("HERE C");
+			//System.out.println("HERE C");
 			return null;
 		}
 
@@ -162,7 +162,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//Populate and filter the immediate neighbours of the fixed nodes
 		for (MyNode key : assignments.keySet()){
 			if (!populateFilter(assignments, candidates, key, confOut, confIn)){
-				System.out.println("HERE D");
+				//System.out.println("HERE D");
 				return null;
 			}
 		}
@@ -171,7 +171,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//populate the candidates map based on the attributes.
 		if (candidates.isEmpty()){
 			if (!altStart.startPop(gp.getNodes(), candidates)){
-				System.out.println("HERE E");
+				//System.out.println("HERE E");
 				return null;
 			}/* else {
 				for (MyNode key : assignments.keySet()){
@@ -185,28 +185,29 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//If the candidates map is still empty, even after populating it through
 		//alternat start, then return null as we have no starting point.
 		if (candidates.isEmpty()){
-			System.out.println("HERE F");
+			//System.out.println("HERE F");
 			return null;
 		}
 
 		//Start the search for the remaining nodes
 		check_rec(assignments, candidates, confIn, new SimInstrument<N>());
 		
-		/*if (neighbourhoodAccess instanceof DSAccess){
+		if (neighbourhoodAccess instanceof DSAccess){
 			DSAccess temp = (DSAccess) neighbourhoodAccess;
 			Map<Integer, Integer> sizes = temp.getNeighbourhoodSizes();
-			
+	
 			System.out.println("DB Queries:");
 			for (Integer key : sizes.keySet()){
 				System.out.println(key + ", " + sizes.get(key));
 			}
 			
+			/*		
 			System.out.println(overallMeasurements);
 			//Print the Result size
 			if (queryResults != null){
 				System.out.println("Result size=" + queryResults.size());
-			}
-		}*/
+			}*/
+		}
 		
 		return queryResults;
 	}
@@ -268,8 +269,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Set<MyNode> jumpStack = new HashSet<MyNode>();
-		
-		System.out.println(nextNode + ", " + candidates.get(nextNode).size());
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
@@ -338,7 +337,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 					} else {
 						//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
 						//When we return from this call stack, we will return using jumpStack.
-						System.out.println("PAUSED G");
+						//System.out.println("PAUSED G");
 						jumpStack.addAll(jumpNodes);
 					}
 				}
@@ -402,7 +401,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				if (candidates.get(otherNode).isEmpty()){
 
 					confOut.add(otherNode);
-					System.out.println("FAILED: " + node.getId() + ", " + assignments.get(node));
+					//System.out.println("FAILED: " + node.getId() + ", " + assignments.get(node));
 					return false;
 				}
 			}
@@ -458,7 +457,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 */
 	public void kill(){
 		this.killed = true;
-		System.out.println("KILLED");
+		System.out.print("KILLED ");
 	}
 
 

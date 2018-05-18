@@ -3,6 +3,7 @@ package ca.ucalgary.ispia.graphpatterns.tests;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -64,7 +65,7 @@ public class SimTestRunner {
 		
 		GPHolder gph = tests.get(idx);
 		System.out.println(gph);
-		
+	
 		List<GPHolder> temp = new ArrayList<GPHolder>();
 		temp.add(gph);
 		executeTests(temp);
@@ -83,23 +84,24 @@ public class SimTestRunner {
 			GPCheckerFCCBJ<MyNode, Object> gpFC = new GPCheckerFCCBJ<MyNode, Object>(test, null, neighbourhoodAccess, variableOrdering, null);
 			//Run the algorithm and record the time
 
-			//Terminator term = 	new Terminator(gpFC);
-			//term.terminateAfter(60000l);
+			Terminator term = 	new Terminator(gpFC);
+			term.terminateAfter(60000l);
 
 			long start = System.nanoTime();
 			List<Map<MyNode, MyNode>> result = gpFC.check();
 			long end = System.nanoTime();
 			
 			//Make sure the terminator is killed
-			//term.nullifyObj();
-			//term.stop();
-			
+			term.nullifyObj();
+			term.stop();
+			/*
 			if (result != null){
 				System.out.print("Size: " + result.size());
 			} else {
 				System.out.print("Result NULL");
 			}
 			System.out.println(", Time: " + (end-start));
+			*/
 		}
 	}
 
