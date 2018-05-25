@@ -50,8 +50,6 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 	public Set<MyNode> findNeighbours(MyRelationship rel, MyNode node, MyNode vertex){
 		
 		//long start = System.nanoTime();
-		//Setup the checking step
-		Set<MyNode> neighbours = new HashSet<MyNode>();					//The list containing the result
 
 		//Get the direction
 		MyDirection dir = null;
@@ -72,6 +70,10 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 			neighbourhoodSizes.put(size, val);
 		} else {
 			neighbourhoodSizes.put(size, 1);
+		}
+		
+		if (size == 394){
+			System.out.println("Suspect Node: " + vertex);
 		}
 		
 		//long end = System.nanoTime();

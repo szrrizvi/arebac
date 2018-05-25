@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
 import ca.ucalgary.ispia.graphpatterns.graph.DataSetWrapper;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
@@ -26,9 +24,6 @@ import ca.ucalgary.ispia.graphpatterns.util.Pair;
  *
  */
 public class SimTestGenerator {
-
-	private String nodePrefix;				//The prefix for the node names
-
 	private Random random;					//Random number generator
 	private DataSetWrapper dataSet;			//graph dataset
 	private float p;						//probability to keep a relationship
@@ -55,9 +50,8 @@ public class SimTestGenerator {
 	 * @param complete The minimal percent of the complete graph (after phase one). 0 = all acceptable, 1 = complete graph necessary
 	 * @param rooted The number of rooted nodes
 	 * @param p	The probability to keep a relationship
-	 * @param nodePrefix The prefix for the node names
 	 */
-	public SimTestGenerator(DataSetWrapper dataSet, Random random, int endSize, double complete,  int rooted, float p, String nodePrefix){
+	public SimTestGenerator(DataSetWrapper dataSet, Random random, int endSize, double complete,  int rooted, float p){
 
 		//Set the graphdb and the random number generator
 		this.dataSet = dataSet;
@@ -68,8 +62,6 @@ public class SimTestGenerator {
 		this.rooted = rooted;
 		this.complete = complete;
 		this.p = p;
-
-		this.nodePrefix = nodePrefix;
 
 		//initialize the lists
 		this.rels = new ArrayList<MyRelationship>();

@@ -33,8 +33,6 @@ import ca.ucalgary.ispia.graphpatterns.util.Pair;
  */
 public class EvalTestGenerator {
 
-	private String nodePrefix;				//The prefix for the node names
-
 	private Random random;					//Random number generator
 	private GraphDatabaseService graphDb;	//db interface
 	private float p;						//probability to keep a relationship
@@ -67,9 +65,8 @@ public class EvalTestGenerator {
 	 * @param p	The probability to keep a relationship
 	 * @param numMex The number of mutual exclusion constraitns
 	 * @param numAttrs The number of attribute requirements
-	 * @param nodePrefix The prefix for the node names
 	 */
-	public EvalTestGenerator(GraphDatabaseService graphDb, Random random, int endSize, double complete,  int rooted, float p, int numMex, int numVAttrs, int numEAttrs, String nodePrefix){
+	public EvalTestGenerator(GraphDatabaseService graphDb, Random random, int endSize, double complete,  int rooted, float p, int numMex, int numVAttrs, int numEAttrs){
 
 		//Set the graphdb and the random number generator
 		this.graphDb = graphDb;
@@ -83,7 +80,6 @@ public class EvalTestGenerator {
 		this.numMex = numMex;
 		this.numVAttrs = numVAttrs;
 		this.numEAttrs = numEAttrs;
-		this.nodePrefix = nodePrefix;
 
 		//initialize the lists
 		this.rels = new ArrayList<Relationship>();
@@ -287,7 +283,7 @@ public class EvalTestGenerator {
 			//Find a random node from the database, using the unique id attribute
 			//Note: There are 82,168 nodes in this database. MAGIC NUMBER!
 			int nodeId = random.nextInt(82168);
-			node = graphDb.findNode(LabelEnum.PERSON, "id" , nodeId);
+			node = graphDb.findNode(LabelEnum.Person, "id" , nodeId);
 			tx.success();
 		}
 
@@ -333,7 +329,7 @@ public class EvalTestGenerator {
 					node = nodePool.get(idx);
 				}
 
-				//Get all relationships of node
+				//Get all relationships of node				
 				Iterable<Relationship> ite = node.getRelationships(Direction.BOTH);
 
 				//Iterate through all of the relationships

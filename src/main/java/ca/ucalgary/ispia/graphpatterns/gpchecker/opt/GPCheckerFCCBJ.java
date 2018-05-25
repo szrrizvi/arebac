@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ca.ucalgary.ispia.graphpatterns.gpchecker.GPChecker;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DSAccess;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
@@ -61,7 +61,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.neighbourhoodAccess = neighbourhoodAccess;
 		this.variableOrdering = variableOrdering;
 		this.altStart = altStart;
-		
+
 		overallMeasurements = new SimInstrument<N>();
 
 	}
@@ -105,7 +105,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 		//For each node in the extraInfo map
 		for (MyNode node : extraInfo.keySet()){
-			
+
 			N vertex = neighbourhoodAccess.findNode(node, extraInfo.get(node));
 			if (vertex != null){
 				assignments.put(node, vertex);
@@ -113,7 +113,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				//System.out.println("HERE A");
 				return null;
 			}
-			
+
 		}
 		//Continue on by delegating to the overloaded method
 		return check_init(assignments, candidates);
@@ -179,8 +179,8 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				}
 			}*/
 		}
-		
-			
+
+
 
 		//If the candidates map is still empty, even after populating it through
 		//alternat start, then return null as we have no starting point.
@@ -191,24 +191,15 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 		//Start the search for the remaining nodes
 		check_rec(assignments, candidates, confIn, new SimInstrument<N>());
-		
-		if (neighbourhoodAccess instanceof DSAccess){
-			DSAccess temp = (DSAccess) neighbourhoodAccess;
-			Map<Integer, Integer> sizes = temp.getNeighbourhoodSizes();
-	
-			System.out.println("DB Queries:");
-			for (Integer key : sizes.keySet()){
-				System.out.println(key + ", " + sizes.get(key));
-			}
-			
-			/*		
-			System.out.println(overallMeasurements);
-			//Print the Result size
-			if (queryResults != null){
-				System.out.println("Result size=" + queryResults.size());
-			}*/
+
+		DBAccess temp = (DBAccess) neighbourhoodAccess;
+		Map<Integer, Integer> sizes = temp.neighbourhoodSizes;
+
+		System.out.println("DB Queries:");
+		for (Integer key : sizes.keySet()){
+			System.out.println(key + ", " + sizes.get(key));
 		}
-		
+
 		return queryResults;
 	}
 
@@ -262,10 +253,10 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		if (consEval != null){
 			consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
 		}
-		
+
 		//Dead-end flag
 		boolean deadEnd = true;
-		
+
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Set<MyNode> jumpStack = new HashSet<MyNode>();
@@ -274,10 +265,10 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
-			
+
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
-			
+
 			for (MyNode key : candidates.keySet()){
 				//Get the set of candidates
 				Set<N> candidatesSet = new HashSet<N>(); 
@@ -307,7 +298,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 			//Perform forward checking
 			boolean validVertex = populateFilter(assnClone, candsClone, nextNode, confOut, confInClone);
-			
+
 			if (validVertex){
 				//Update deadEnd flag
 				deadEnd = false;
@@ -319,9 +310,9 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				sim.updateCandidates(candsClone);
 				sim.updateConfIn(confInClone);
 				sim.updateConfOut(confOut);
-				
+
 				overallMeasurements.update(sim);*/
-				
+
 				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone, sim);
 
 				if (killed){
@@ -329,7 +320,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				}
 
 				if (jumpNodes != null && !jumpNodes.isEmpty()){
-					
+
 					if (!jumpNodes.contains(nextNode)){
 						//If there is a future node assignment that leads to a deadend, such that the future node has no conflicts with nextNode,
 						//then no other candidate of nextNode can prevent the deadend. Therefore, we can just return using jumpNodes.
@@ -365,11 +356,11 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 * @return
 	 */
 	private boolean populateFilter(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
-		
+
 		N vertex = assignments.get(node);
 		//Get all of the relationships from GP that contain the given node.
 		List<MyRelationship> rels = gp.getAllRelationships(node);
-		
+
 		//Iterate through the relationships
 		for (MyRelationship rel : rels){
 			//Record the other node (from the perspective of the given node)
@@ -391,7 +382,9 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 					temp.retainAll(neighbours);				
 				} else {
 					//Else populate it
-					candidates.put(otherNode, neighbours);
+					Set<N> temp = new HashSet<N>();
+					temp.addAll(neighbours);
+					candidates.put(otherNode, temp);
 
 					//If there is populating, then add the incoming conflict.
 					addConflictIn(node, otherNode, confIn);
@@ -435,7 +428,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				//Get the nodes
 				N source = fixedNodes.get(rel.getSource());
 				N target = fixedNodes.get(rel.getTarget());
-				
+
 				boolean relExists = neighbourhoodAccess.relationshipExists(source, target, rel);
 
 				//If the relationship did not pass, then return false

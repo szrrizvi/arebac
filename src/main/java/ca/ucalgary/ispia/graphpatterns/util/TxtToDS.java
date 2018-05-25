@@ -1,4 +1,4 @@
-package ca.ucalgary.ispia.graphpatterns.tests;
+package ca.ucalgary.ispia.graphpatterns.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;

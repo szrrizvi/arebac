@@ -64,21 +64,21 @@ public class DataSetInterface {
 	 * @return The set of neighbours to/from the given node.
 	 */
 	public Set<MyNode> getNeighbours(MyNode node, RelType relType, MyDirection dir){
-		Set<MyNode> temp = new HashSet<MyNode>();
+		Set<MyNode> temp = null;
 		
 		if (dir == MyDirection.OUTGOING){
 			//Outgoing relationships; node = src
 			if (matrixOut[node.getId()][relType.getIdx()] != null){
-				temp.addAll(matrixOut[node.getId()][relType.getIdx()]);
+				return matrixOut[node.getId()][relType.getIdx()];
 			}
 		} else if (dir == MyDirection.INCOMING) {
 			//Incoming relationships; node = tgt
 			if (matrixIn[node.getId()][relType.getIdx()] != null){
-				temp.addAll(matrixIn[node.getId()][relType.getIdx()])  ;
+				return matrixIn[node.getId()][relType.getIdx()];
 			}
 		} else {
 			//Both directions; node = src || node = tgt
-			
+			temp = new HashSet<MyNode>();
 			if (matrixOut[node.getId()][relType.getIdx()] != null){
 				temp.addAll(matrixOut[node.getId()][relType.getIdx()]);
 			}
@@ -86,6 +86,11 @@ public class DataSetInterface {
 				temp.addAll(matrixIn[node.getId()][relType.getIdx()])  ;
 			}
 		}
+		
+		if (temp == null){
+			temp = new HashSet<MyNode>();
+		}
+		
 		return temp;
 	}
 	

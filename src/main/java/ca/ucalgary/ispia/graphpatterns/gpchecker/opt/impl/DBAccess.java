@@ -1,6 +1,7 @@
 package ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,8 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 	private final GraphDatabaseService graphDb;					//GraphDatabaseService - gives access to the database
 	private final ConstraintsEvaluator<Node, Entity> constraintsEvaluator;	//ConstraintsEvaluator - gives access to the components that ensures constraints are satisfied
 	
+	public Map<Integer, Integer> neighbourhoodSizes; 
+
 	/**
 	 * Initilizes the instance variables.
 	 * @param graphDb The GraphDatabaseService
@@ -39,6 +42,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		//Initialize the instance variables
 		this.graphDb = graphDb;
 		this.constraintsEvaluator = constraintsEvaluator;
+		this.neighbourhoodSizes = new HashMap<Integer, Integer>();
 	}
 	
 	/**
@@ -86,6 +90,14 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 			tx.success();
 		}
 
+		int size = neighbours.size();
+		if (neighbourhoodSizes.containsKey(size)){
+			int val = neighbourhoodSizes.get(size)+1;
+			neighbourhoodSizes.put(size, val);
+		} else {
+			neighbourhoodSizes.put(size, 1);
+		}
+		
 		return neighbours;
 	}
 	
@@ -95,7 +107,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		
 		try (Transaction tx = graphDb.beginTx()){
 			
-			tgt = graphDb.findNode(LabelEnum.PERSON, "id", Integer.parseInt(src.getAttribute("id")));
+			tgt = graphDb.findNode(LabelEnum.Person, "id", Integer.parseInt(src.getAttribute("id")));
 			
 			if (tgt == null){
 				//If the node is not found, return null
@@ -116,7 +128,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		
 		try (Transaction tx = graphDb.beginTx()){
 			
-			tgt = graphDb.findNode(LabelEnum.PERSON, "id", id);
+			tgt = graphDb.findNode(LabelEnum.Person, "id", id);
 			
 			if (tgt == null){
 				//If the node is not found, return null

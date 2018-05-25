@@ -3,18 +3,24 @@ package ca.ucalgary.ispia.graphpatterns.tests;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.neo4j.graphdb.Entity;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.AltStart;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.ConstraintsEvaluator;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerFCCBJ;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.VariableOrdering;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DSAccess;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ConstraintsChecker;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
-import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 
@@ -25,14 +31,14 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
  */
 public class SimTestRunner {
 
-	private DataSetInterface dataset;
+	private GraphDatabaseService graphDb;
 
 	/**
 	 * Constructor. Initialize the data set wrapper
 	 * @param graphDb
 	 */
-	public SimTestRunner(DataSetInterface dataset){
-		this.dataset = dataset;
+	public SimTestRunner(GraphDatabaseService graphDb){
+		this.graphDb = graphDb;
 	}
 
 
@@ -55,6 +61,7 @@ public class SimTestRunner {
 			ois.close();
 			//Execute the tests
 			executeTests(tests);
+			System.out.println("DONE SET: " + i);
 		}
 	}
 	
@@ -78,30 +85,33 @@ public class SimTestRunner {
 	 */
 	public void executeTests(List<GPHolder> tests){
 		for (GPHolder test : tests){	//Iterate through the tests
-			NeighbourhoodAccess<MyNode> neighbourhoodAccess = new DSAccess(dataset);
-			VariableOrdering<MyNode> variableOrdering = new LeastCandidates<MyNode>(test.getGp());
+			
+			ConstraintsEvaluator<Node,Entity> ce = new ConstraintsChecker(test, graphDb);
+			NeighbourhoodAccess<Node> neighbourhoodAccess = new DBAccess(graphDb, ce);
+			VariableOrdering<Node> variableOrdering = new LeastCandidates<Node>(test.getGp());
+			AltStart<Node> as = new AttrBasedStart(graphDb, ce);
 
-			GPCheckerFCCBJ<MyNode, Object> gpFC = new GPCheckerFCCBJ<MyNode, Object>(test, null, neighbourhoodAccess, variableOrdering, null);
+			GPCheckerFCCBJ<Node, Entity> gpFC = new GPCheckerFCCBJ<Node, Entity>(test, ce, neighbourhoodAccess, variableOrdering, as);
 			//Run the algorithm and record the time
 
 			Terminator term = 	new Terminator(gpFC);
 			term.terminateAfter(60000l);
 
 			long start = System.nanoTime();
-			List<Map<MyNode, MyNode>> result = gpFC.check();
+			List<Map<MyNode, Node>> result = gpFC.check();
 			long end = System.nanoTime();
 			
 			//Make sure the terminator is killed
 			term.nullifyObj();
 			term.stop();
-			/*
-			if (result != null){
+			
+			/*if (result != null){
 				System.out.print("Size: " + result.size());
 			} else {
 				System.out.print("Result NULL");
 			}
-			System.out.println(", Time: " + (end-start));
-			*/
+			System.out.println(", Time: " + (end-start));*/
+			
 		}
 	}
 

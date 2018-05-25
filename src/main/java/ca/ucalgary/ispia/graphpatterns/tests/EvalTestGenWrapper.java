@@ -123,7 +123,7 @@ public class EvalTestGenWrapper {
 		GPHolder gpA = null;
 		while (!gpADone){
 			//Keep looping until we get a non-null result.
-			etgA = new EvalTestGenerator(graphDb, random, endSizeA, completeA, rootedA, pA, numMexA, numVAttrsA, numEAttrsA, "A");
+			etgA = new EvalTestGenerator(graphDb, random, endSizeA, completeA, rootedA, pA, numMexA, numVAttrsA, numEAttrsA);
 			gpA = etgA.createDBBasedGP();
 			if (gpA != null){
 				gpADone = true;
@@ -153,7 +153,7 @@ public class EvalTestGenWrapper {
 		GPHolder gpB = null;
 		while(!gpBDone){
 			//Keep looping until we get a non-null result.
-			etgB = new EvalTestGenerator(graphDb, random, endSizeB, completeB, rootedB, pB, numMexB, numVAttrsB, numEAttrsB, "B");
+			etgB = new EvalTestGenerator(graphDb, random, endSizeB, completeB, rootedB, pB, numMexB, numVAttrsB, numEAttrsB);
 			gpB = etgB.createDBBasedGP(nodes);
 			if (gpB != null){
 				gpBDone = true;
