@@ -14,7 +14,6 @@ import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.tests.Killable;
-import ca.ucalgary.ispia.graphpatterns.tests.SimInstrument;
 
 /**
  * This class provides the engine for checking if a given graph pattern
@@ -36,8 +35,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	private final NeighbourhoodAccess<N> neighbourhoodAccess;
 	private final VariableOrdering<N> variableOrdering;
 	private final AltStart<N> altStart;
-
-	private SimInstrument<N> overallMeasurements;
 
 	private boolean killed;							//The kill flag.
 
@@ -61,8 +58,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.neighbourhoodAccess = neighbourhoodAccess;
 		this.variableOrdering = variableOrdering;
 		this.altStart = altStart;
-
-		overallMeasurements = new SimInstrument<N>();
 
 	}
 
@@ -190,7 +185,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		}
 
 		//Start the search for the remaining nodes
-		check_rec(assignments, candidates, confIn, new SimInstrument<N>());
+		check_rec(assignments, candidates, confIn);
 
 		DBAccess temp = (DBAccess) neighbourhoodAccess;
 		Map<Integer, Integer> sizes = temp.neighbourhoodSizes;
@@ -215,7 +210,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 * @return
 	 */
 
-	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn, SimInstrument<N> measurements){
+	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn){
 		//If the search has been killed, return false
 		if (killed){
 			return null;
@@ -305,15 +300,8 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
-				SimInstrument<N> sim = new SimInstrument<N> ();//measurements);
-				/*sim.updateAssignments(assnClone);
-				sim.updateCandidates(candsClone);
-				sim.updateConfIn(confInClone);
-				sim.updateConfOut(confOut);
 
-				overallMeasurements.update(sim);*/
-
-				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone, sim);
+				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone);
 
 				if (killed){
 					return null;

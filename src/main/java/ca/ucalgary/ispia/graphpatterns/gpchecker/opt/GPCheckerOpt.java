@@ -19,7 +19,6 @@ import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ConstraintsChecker;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ReturnStructImpl;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;

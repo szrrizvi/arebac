@@ -98,6 +98,10 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 			neighbourhoodSizes.put(size, 1);
 		}
 		
+		if (size == 391){
+			System.out.println("391: " + rel + ", " + node + ", " + vertex);
+		}
+		
 		return neighbours;
 	}
 	
