@@ -6,7 +6,7 @@ import java.util.Random;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.tests.SimTestGenWrapper;
+import ca.ucalgary.ispia.graphpatterns.util.JacksonRogersModel;
 /**
  * The driver.
  * @author szrrizvi
@@ -18,15 +18,18 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args){	
-		//Test!
 				
-		Driver d = new Driver();
+		JacksonRogersModel jrm = new JacksonRogersModel(110000, 28, 28, 0.33f, 0.33f, new Random());
+		jrm.slashDotNetwork();
+		jrm.generateModdel();
+		
+		/*Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("simulation-tests/soc-pokecdb");
 		
 		Random random = new Random(1172506);
 		
 		
-		SimTestGenWrapper.generateSimTests(graphDb, "soc-pokec", random);
+		SimTestGenWrapper.generateSimTests(graphDb, "soc-pokec", random);*/
 		/*
 		SimTestRunner str = new SimTestRunner(graphDb);
 		try {
@@ -37,7 +40,7 @@ public class Driver {
 			return;
 		}*/
 		
-		graphDb.shutdown();
+		//graphDb.shutdown();
 	}
 
 	/**
