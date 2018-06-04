@@ -1,12 +1,11 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.util.Random;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.util.JacksonRogersModel;
+import ca.ucalgary.ispia.graphpatterns.util.SimpleCypherParser;
 /**
  * The driver.
  * @author szrrizvi
@@ -18,10 +17,9 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args){	
-				
-		JacksonRogersModel jrm = new JacksonRogersModel(110000, 28, 28, 0.33f, 0.33f, new Random());
-		jrm.slashDotNetwork();
-		jrm.generateModdel();
+		
+		SimpleCypherParser scp = new SimpleCypherParser("profile-7.txt");
+		scp.parse();
 		
 		/*Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("simulation-tests/soc-pokecdb");

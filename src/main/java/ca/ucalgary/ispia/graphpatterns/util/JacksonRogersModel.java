@@ -1,16 +1,14 @@
 package ca.ucalgary.ispia.graphpatterns.util;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
-
-import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 
 /**
  * This class provides the method(s) needed to generate a random social network based on the Jackson and Rogers model. 
@@ -32,8 +30,8 @@ public class JacksonRogersModel {
 	Random random;				//PRNG
 	
 	//The network state,
-	Set<MyNode> allNodes;
-	Set<MyNode>[] matrix;
+	Set<Integer> allNodes;
+	Set<Integer>[] matrix;
 	
 	/**
 	 * Constructor. Initialize the instance variables.
@@ -70,44 +68,44 @@ public class JacksonRogersModel {
 		//Generate the model
 		for (int count = nodeCounter; count < totalNodes; count++){
 			//Create a new node
-			MyNode newNode = new MyNode(nodeCounter, "Person");
+			Integer newNode = new Integer(nodeCounter);
 			nodeCounter++;
 			
 			//Phase 1 Part 1; Pick mr nodes that already exist in the network.
-			List<MyNode> allNodesCopy = new ArrayList<MyNode>();
+			List<Integer> allNodesCopy = new ArrayList<Integer>();
 			allNodesCopy.addAll(allNodes);
 			//These nodes would be the parents of newNode
-			List<MyNode> parents = new ArrayList<MyNode>();
+			List<Integer> parents = new ArrayList<Integer>();
 			//Pick mr random parents
 			for (int mrCount = 0; mrCount < mr; mrCount++){
 				parents.add(allNodesCopy.remove(random.nextInt(allNodesCopy.size())));
 			}
 			
 			//Phase 1 Part 2; Create a relationship between newNode and each parent with probability pr.
-			for (MyNode parent : parents){
+			for (Integer parent : parents){
 				if (pr > random.nextFloat()){
 					
-					if (matrix[newNode.getId()] == null){
-						matrix[newNode.getId()] = new HashSet<MyNode>();
+					if (matrix[newNode] == null){
+						matrix[newNode] = new HashSet<Integer>();
 					}
-					matrix[newNode.getId()].add(parent);
+					matrix[newNode].add(parent);
 				}
 			}
 
 			
 			//Phase 2 Part 1; Pick mn nodes that are connected to the parent nodes (excluding all parents and newNode).
 			//These nodes will be the grand parents of newNode
-			List<MyNode> grandParents = new ArrayList<MyNode>();
-			List<MyNode> candidates = new ArrayList<MyNode>();
+			List<Integer> grandParents = new ArrayList<Integer>();
+			List<Integer> candidates = new ArrayList<Integer>();
 			//Gather all potential grand parents
-			for (MyNode parent: parents){
-				if (matrix[parent.getId()] != null){
-					candidates.addAll(matrix[parent.getId()]);
+			for (Integer parent: parents){
+				if (matrix[parent] != null){
+					candidates.addAll(matrix[parent]);
 				}
 			}
 			//Filtering
 			candidates.remove(newNode);		//newNode cannot be its own grand parent		
-			for (MyNode parent: parents){
+			for (Integer parent: parents){
 				candidates.remove(parent);	//A parent cannot also be a grand parent
 			}
 			
@@ -119,18 +117,22 @@ public class JacksonRogersModel {
 			}
 			
 			//Phase 2 Part 2; Create a relationship between newNode and each grand parent with probability pn.
-			for (MyNode grandParent : grandParents){
+			for (Integer grandParent : grandParents){
 				if (pn > random.nextFloat()){
 					
-					if (matrix[newNode.getId()] == null){
-						matrix[newNode.getId()] = new HashSet<MyNode>();
+					if (matrix[newNode] == null){
+						matrix[newNode] = new HashSet<Integer>();
 					}
-					matrix[newNode.getId()].add(grandParent);
+					matrix[newNode].add(grandParent);
 				}
 			}
 			allNodes.add(newNode);
 			
 		}
+		
+		
+		
+		writeSNToFile();
 		analysis();
 	}
 	
@@ -141,6 +143,7 @@ public class JacksonRogersModel {
 		}
 		
 		matrix = new HashSet[totalNodes];
+		Set<Integer> seenNodes = new HashSet<Integer>();
 		
 		Scanner scan = null;
 		try {
@@ -150,8 +153,6 @@ public class JacksonRogersModel {
 			System.out.println("File not found");
 			return;
 		}
-		
-		Map<Integer, MyNode> nodesMap = new HashMap<Integer, MyNode>();
 		
 		while (scan.hasNext()){
 			String line = scan.nextLine();
@@ -168,41 +169,22 @@ public class JacksonRogersModel {
 			int srcID = Integer.parseInt(relInfo[0]);
 			int tgtID = Integer.parseInt(relInfo[1]);
 			
-			MyNode srcNode = null;
-			MyNode tgtNode = null;
-			
-			//If the src node has been seen in the past, then look it up in the nodesMap
-			//else create a new node and add it to the nodesMap
-			if (nodesMap.containsKey(srcID)){
-				srcNode = nodesMap.get(srcID);
-			} else {
-				srcNode = new MyNode(srcID, "");
-				nodesMap.put(srcID, srcNode);
-			}
-			
-			//If the tgt node has been seen in the past, then look it up in the nodesMap
-			//else create a new node and add it to the nodesMap
-			if (nodesMap.containsKey(tgtID)){
-				tgtNode = nodesMap.get(tgtID);
-			} else {
-				tgtNode = new MyNode(tgtID, "");
-				nodesMap.put(tgtID, tgtNode);
-			}
+			seenNodes.add(srcID);
+			seenNodes.add(tgtID);
+						
 			
 			if (matrix[srcID] == null){
-				Set<MyNode> rels = new HashSet<MyNode>();
+				Set<Integer> rels = new HashSet<Integer>();
 				matrix[srcID] = rels;
 			}
 			
-			matrix[srcID].add(tgtNode);
+			matrix[srcID].add(tgtID);
 		}
 		
 		scan.close();
-		nodeCounter = nodesMap.size();
-		allNodes = new HashSet<MyNode>();
-		for (Integer key : nodesMap.keySet()){
-			allNodes.add(nodesMap.get(key));
-		}
+		nodeCounter = seenNodes.size();
+		allNodes = new HashSet<Integer>();
+		allNodes.addAll(seenNodes);
 		analysis();
 		return;
 	}
@@ -216,13 +198,13 @@ public class JacksonRogersModel {
 		
 		int cnt = 0;
 
-		for (MyNode node : allNodes){
+		for (Integer node : allNodes){
 			if (node != null){
 				
 				numNodes++;
 				int tDegree = -1;
-				if (matrix[node.getId()] != null){
-					tDegree = matrix[node.getId()].size();
+				if (matrix[node] != null){
+					tDegree = matrix[node].size();
 				} else {
 					tDegree = 0;
 				}
@@ -246,5 +228,38 @@ public class JacksonRogersModel {
 		System.out.println("Max Total Degree: " + maxTDegree);
 		System.out.println("Min Total Degree: " + minTDegree);
 		System.out.println("Avg Total Degree: " + ((double)totalTDegree/(double)numNodes));
+	}
+	
+	private void writeSNToFile(){
+		PrintWriter pw = null;
+		
+		try {
+			pw = new PrintWriter(new FileOutputStream("nodes.csv"));
+		} catch (Exception e){
+			e.printStackTrace();
+			return;
+		}
+		pw.println(":ID,id:int,:LABEL");
+		for (int idx = 0; idx < matrix.length; idx++){
+			pw.println(idx+","+idx+",Person");
+		}
+		pw.close();
+		
+		try {
+			pw = new PrintWriter(new FileOutputStream("rels.csv"));
+		} catch (Exception e){
+			e.printStackTrace();
+			return;
+		}
+		pw.println(":START_ID,:END_ID,:TYPE");
+		for (int idx = 0; idx < matrix.length; idx++){
+			Set<Integer> rels = matrix[idx]; 
+			if (rels != null){
+				for (Integer tgt : rels){
+					pw.println(idx+","+tgt+",RelA");
+				}
+			}
+		}
+		pw.close();
 	}
 }
