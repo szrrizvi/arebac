@@ -1,15 +1,11 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
-import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
-import ca.ucalgary.ispia.graphpatterns.util.DataSetUtil;
+import ca.ucalgary.ispia.graphpatterns.util.SimpleCypherParser;
 /**
  * The driver.
  * @author szrrizvi
@@ -21,17 +17,9 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args){	
-				
-		DataSet ds = DataSetUtil.loadDataSet("soc-pokec-relationships");
-		DataSetInterface dsi = new DataSetInterface(ds);
 		
-		List<Integer> sizes = new ArrayList<Integer>();
-		sizes.add(10000);
-		sizes.add(15000);
-		sizes.add(20000);
-		
-		
-		DataSetUtil.analyzeHubs(dsi, sizes);
+		SimpleCypherParser scp = new SimpleCypherParser("profile-7.txt");
+		scp.parse();
 		
 		/*Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("simulation-tests/soc-pokecdb");
