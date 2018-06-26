@@ -1,12 +1,15 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.util.JacksonRogersModel;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSet;
+import ca.ucalgary.ispia.graphpatterns.graph.DataSetInterface;
+import ca.ucalgary.ispia.graphpatterns.util.DataSetUtil;
 /**
  * The driver.
  * @author szrrizvi
@@ -19,9 +22,16 @@ public class Driver {
 	 */
 	public static void main(String[] args){	
 				
-		JacksonRogersModel jrm = new JacksonRogersModel(110000, 28, 28, 0.33f, 0.33f, new Random());
-		jrm.slashDotNetwork();
-		jrm.generateModdel();
+		DataSet ds = DataSetUtil.loadDataSet("soc-pokec-relationships");
+		DataSetInterface dsi = new DataSetInterface(ds);
+		
+		List<Integer> sizes = new ArrayList<Integer>();
+		sizes.add(10000);
+		sizes.add(15000);
+		sizes.add(20000);
+		
+		
+		DataSetUtil.analyzeHubs(dsi, sizes);
 		
 		/*Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("simulation-tests/soc-pokecdb");

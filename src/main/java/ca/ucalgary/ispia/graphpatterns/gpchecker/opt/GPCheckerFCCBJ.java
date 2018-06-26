@@ -320,7 +320,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 						jumpStack.addAll(jumpNodes);
 					}
 				}
-			}
+			}  // else NEED TO DO SOMETHING WITH CBJ HERE
 		}
 
 		if (deadEnd){

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,7 +16,7 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 
 public class DataSetUtil {
 
-	private static DataSet loadDataSet(String fileName){
+	public static DataSet loadDataSet(String fileName){
 
 		DataSet dataSet = null;
 
@@ -34,7 +35,7 @@ public class DataSetUtil {
 		return dataSet;
 	}
 
-	private static void saveDataSet(String fileName, Random random){
+	public static void saveDataSet(String fileName, Random random){
 		DataSet ds = TxtToDS.readDataSet("simulation-tests/"+fileName+".txt", random);
 
 		try {
@@ -48,7 +49,7 @@ public class DataSetUtil {
 	}
 	
 
-	private static void dsStats(DataSetInterface dsi){
+	public static void dsStats(DataSetInterface dsi){
 		int maxTDegree = -1;
 		int minTDegree = Integer.MAX_VALUE;
 		int totalTDegree = 0;
@@ -173,6 +174,43 @@ public class DataSetUtil {
 		for (Integer key: freqI.keySet()){
 			System.out.println(key + " " + freqI.get(key));
 		}
-
+	}
+	
+	public static void analyzeHubs(DataSetInterface dsi, List<Integer> sizes){
+		Map<Integer, Integer> mapOut = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> mapIn = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> mapTotal = new HashMap<Integer, Integer>();
+		
+		for (Integer num : sizes){
+			mapOut.put(num, 0);
+			mapIn.put(num, 0);
+			mapTotal.put(num, 0);
+		}
+		
+		MyNode[] nodes = dsi.getNodes();
+		for (MyNode node : nodes){
+			int out = dsi.getOutDegree(node);
+			int in = dsi.getInDegree(node);
+			int total = out+in;
+			
+			for (Integer num : sizes){
+				if (out >= num){
+					int val = mapOut.get(num) +1;
+					mapOut.put(num, val);
+				}
+				if (in >= num){
+					int val = mapIn.get(num) +1;
+					mapIn.put(num, val);
+				}
+				
+				if (total >= num){
+					int val = mapTotal.get(num) +1;
+					mapTotal.put(num, val);
+				}
+			}
+		}
+		for (Integer num : sizes){
+			System.out.println(num+": " + mapOut.get(num) + ", " + mapIn.get(num) + ", " + mapTotal.get(num));
+		}
 	}
 }
