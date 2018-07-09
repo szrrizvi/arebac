@@ -307,7 +307,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 					//System.out.println("PAUSED G");
 					conflicts.addAll(jumpNodes);
 				}
-			}
+			}  // else NEED TO DO SOMETHING WITH CBJ HERE
 		}
 
 		if (deadEnd || bjFlag == count){
