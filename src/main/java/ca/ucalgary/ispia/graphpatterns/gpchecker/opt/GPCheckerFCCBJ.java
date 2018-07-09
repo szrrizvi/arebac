@@ -36,6 +36,8 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	private final VariableOrdering<N> variableOrdering;
 	private final AltStart<N> altStart;
 
+	private int count;
+
 	private boolean killed;							//The kill flag.
 
 	/**
@@ -59,6 +61,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.variableOrdering = variableOrdering;
 		this.altStart = altStart;
 
+		count = 0;
 	}
 
 	/**
@@ -103,7 +106,9 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 			N vertex = neighbourhoodAccess.findNode(node, extraInfo.get(node));
 			if (vertex != null){
-				assignments.put(node, vertex);
+				Set<N> temp = new HashSet<N>();
+				temp.add(vertex);
+				candidates.put(node, temp);
 			} else {
 				//System.out.println("HERE A");
 				return null;
@@ -125,62 +130,38 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	 */
 	private List<Map<MyNode, N>> check_init(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates){
 
-		//Get the set of pre fixed nodes
-		Set<MyNode> alreadyFixed = assignments.keySet();
-
-		//Create the assignments for the remaining fixed nodes
+		//Create the candidates for the remaining fixed nodes
 		List<MyNode> nodes = gp.getNodes();
 		for (MyNode node : nodes){
 			//These nodes are not already fixed and have the id attribute
-			if (!alreadyFixed.contains(node) && node.hasAttribute("id")){
+			if (!candidates.keySet().contains(node) && node.hasAttribute("id")){
 
 				N vertex = neighbourhoodAccess.findNode(node);
 				if (vertex != null){
-					assignments.put(node, vertex);
+					Set<N> temp = new HashSet<N>();
+					temp.add(vertex);
+					candidates.put(node, temp);
 				} else {
-					//System.out.println("HERE B");
 					return null;
 				}				
 			}
-		}
-		//Check the direct relationships between the fixed nodes
-		if (!preCheck(assignments)){
-			//If the precheck fails, then return false.
-			//System.out.println("HERE C");
-			return null;
 		}
 
 		//Initialize the conflit maps
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Map<MyNode, Set<MyNode>> confIn = new HashMap<MyNode, Set<MyNode>>();
 
-		//Populate and filter the immediate neighbours of the fixed nodes
-		for (MyNode key : assignments.keySet()){
-			if (!populateFilter(assignments, candidates, key, confOut, confIn)){
-				//System.out.println("HERE D");
-				return null;
-			}
-		}
-
 		//If the canadidates map is still empty, because there we no fixed nodes, then
 		//populate the candidates map based on the attributes.
 		if (candidates.isEmpty()){
 			if (!altStart.startPop(gp.getNodes(), candidates)){
-				//System.out.println("HERE E");
 				return null;
-			}/* else {
-				for (MyNode key : assignments.keySet()){
-					candidates.remove(key);
-				}
-			}*/
+			}
 		}
-
-
 
 		//If the candidates map is still empty, even after populating it through
 		//alternat start, then return null as we have no starting point.
 		if (candidates.isEmpty()){
-			//System.out.println("HERE F");
 			return null;
 		}
 
@@ -221,6 +202,8 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
 
+			count++;
+
 			//Add the assignments for the queryResults list
 			List<MyNode> resultSchema = gph.getResultSchema();
 			Map<MyNode, N> result = new HashMap<MyNode, N>();
@@ -237,11 +220,12 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				queryResults.add(result);
 			}
 			Set<MyNode> res = new HashSet<MyNode>();
-			res.addAll(new HashSet<MyNode>());
 			return res;
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
+
+		int bjFlag = count;
 
 		//Pick the next node to assign such that it is populated but not yet assigned 
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
@@ -254,7 +238,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
-		Set<MyNode> jumpStack = new HashSet<MyNode>();
+		Set<MyNode> conflicts = new HashSet<MyNode>();
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
@@ -307,26 +291,30 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 					return null;
 				}
 
-				if (jumpNodes != null && !jumpNodes.isEmpty()){
+				if (jumpNodes == null){
+					System.out.println("Unexpected Return value: NULL");
+					killed = true;
+					return null;
+				}
 
-					if (!jumpNodes.contains(nextNode)){
-						//If there is a future node assignment that leads to a deadend, such that the future node has no conflicts with nextNode,
-						//then no other candidate of nextNode can prevent the deadend. Therefore, we can just return using jumpNodes.
-						return jumpNodes;
-					} else {
-						//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
-						//When we return from this call stack, we will return using jumpStack.
-						//System.out.println("PAUSED G");
-						jumpStack.addAll(jumpNodes);
-					}
+				if (!jumpNodes.isEmpty() && !jumpNodes.contains(nextNode)){
+					//If there is a future node assignment that leads to a deadend, such that the future node has no conflicts with nextNode,
+					//then no other candidate of nextNode can prevent the deadend. Therefore, we can just return using jumpNodes.
+					return jumpNodes;
+				} else {
+					//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
+					//When we return from this call stack, we will return using jumpStack.
+					//System.out.println("PAUSED G");
+					conflicts.addAll(jumpNodes);
 				}
 			}
 		}
 
-		if (deadEnd){
-			return deadEndJump(nextNode, confOut, confIn);
+		if (deadEnd || bjFlag == count){
+			conflicts.addAll(deadEndJump(nextNode, confOut, confIn));
+			return conflicts;
 		} else {
-			return jumpStack;
+			return new HashSet<MyNode>();
 		}
 	}
 
