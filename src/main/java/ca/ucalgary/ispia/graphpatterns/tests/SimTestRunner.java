@@ -104,14 +104,6 @@ public class SimTestRunner {
 			//Make sure the terminator is killed
 			term.nullifyObj();
 			term.stop();
-			
-			/*if (result != null){
-				System.out.print("Size: " + result.size());
-			} else {
-				System.out.print("Result NULL");
-			}
-			System.out.println(", Time: " + (end-start));*/
-			
 		}
 	}
 

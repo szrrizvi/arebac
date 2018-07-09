@@ -107,24 +107,8 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 	
 	public Node findNode(MyNode src){
 		
-		Node tgt = null;
-		
-		try (Transaction tx = graphDb.beginTx()){
-			
-			tgt = graphDb.findNode(LabelEnum.Person, "id", Integer.parseInt(src.getAttribute("id")));
-			
-			if (tgt == null){
-				//If the node is not found, return null
-				System.out.println("Not fixed: " + src.getAttribute("id"));
-			}
+		return findNode(src, Integer.parseInt(src.getAttribute("id")));
 
-			if (!constraintsEvaluator.checkAttrs(src, tgt)){
-				//If other attr requirements fail, then tgt is not the correct node
-				tgt = null;						
-			}	
-			tx.success();
-		}
-		return tgt;
 	}
 	
 	public Node findNode(MyNode src, Integer id){

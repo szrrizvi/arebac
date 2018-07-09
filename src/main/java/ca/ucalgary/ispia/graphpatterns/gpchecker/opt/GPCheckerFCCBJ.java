@@ -168,6 +168,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//Start the search for the remaining nodes
 		check_rec(assignments, candidates, confIn);
 
+		
 		DBAccess temp = (DBAccess) neighbourhoodAccess;
 		Map<Integer, Integer> sizes = temp.neighbourhoodSizes;
 
@@ -383,40 +384,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	//--------------------------//
 	// HELPER METHODS
 	//--------------------------//	
-
-	/**
-	 * This method checks the direct relationships between the fixed nodes.
-	 * @param gp
-	 * @param fixedNodes
-	 * @return
-	 */
-	private boolean preCheck(Map<MyNode, N> fixedNodes){//, Set<MyNode> visitedNodes){
-
-		//Get all of the relationships from GP.
-		List<MyRelationship> rels = gp.getAllRelationships();
-
-		//Iterate through the relationships
-		for (MyRelationship rel : rels){
-			//Find the relationships that contain the fixed nodes
-			if (fixedNodes.containsKey(rel.getSource()) && fixedNodes.containsKey(rel.getTarget())){
-
-
-				//Get the nodes
-				N source = fixedNodes.get(rel.getSource());
-				N target = fixedNodes.get(rel.getTarget());
-
-				boolean relExists = neighbourhoodAccess.relationshipExists(source, target, rel);
-
-				//If the relationship did not pass, then return false
-				if (!relExists){
-					return false;
-				}
-			}
-		}
-
-		//If reached here, the all of the relationships passed, thus return true.
-		return true;
-	}
 
 	//-------------------------//
 	// KILLABLE FEATURES	

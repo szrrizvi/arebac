@@ -28,14 +28,14 @@ public class Translator {
 		StringBuilder sb = new StringBuilder();
 		
 		for (MyRelationship rel : rels){
-			sb.append("MATCH (" + rel.getSource().getId() + ":PERSON) -[" + rel.getId() +" : " + rel.getIdentifier() + "]->("+rel.getTarget().getId()+":PERSON) \n");
+			sb.append("MATCH (a" + rel.getSource().getId() + ":PERSON) -[b" + rel.getId() +" : " + rel.getIdentifier() + "]->(a"+rel.getTarget().getId()+":PERSON) \n");
 			seenNodes.add(rel.getSource());
 			seenNodes.add(rel.getTarget());
 		}
 		
 		for (MyNode node : nodes){
 			if (!seenNodes.contains(node)){
-				sb.append("MATCH (" + node.getId() + ":PERSON) \n");
+				sb.append("MATCH (a" + node.getId() + ":PERSON) \n");
 			}
 		}
 		
@@ -58,7 +58,7 @@ public class Translator {
 					} else {
 						sb.append("AND ");
 					}
-					sb.append(node.getId()+ ".`" + key + "`=");
+					sb.append("a"+node.getId()+ ".`" + key + "`=");
 					
 					if (AttributeTypes.isIntType(key) || key.equals("id")){
 						sb.append(node.getAttribute(key) + " ");
@@ -88,7 +88,7 @@ public class Translator {
 					} else {
 						sb.append("AND ");
 					}
-					sb.append(rel.getId()+ ".`" + key + "`=");
+					sb.append("b"+rel.getId()+ ".`" + key + "`=");
 					
 					if (AttributeTypes.isIntType(key) || key.equals("id")){
 						sb.append(rel.getAttribute(key) + " ");
@@ -109,7 +109,7 @@ public class Translator {
 				sb.append("AND ");
 			}
 			
-			sb.append(mex.first.getId() + "<>" + mex.second.getId() + " ");
+			sb.append("a"+mex.first.getId() + "<>a" + mex.second.getId() + " ");
 		}
 		
 		boolean retFirst = true;
@@ -120,7 +120,7 @@ public class Translator {
 			} else {
 				sb.append(",");
 			}
-			sb.append(node.getId());
+			sb.append("a"+node.getId());
 		}
 		
 		return sb.toString();
