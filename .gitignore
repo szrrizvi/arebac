@@ -8,3 +8,6 @@
 /*files/
 out*
 /simulation-tests/
+*.csv
+/profile-1.txt
+/profile-7.txt
