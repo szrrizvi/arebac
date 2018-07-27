@@ -40,72 +40,6 @@ public class EvalTestRunner {
 		this.graphDb = graphDb;
 	}
 
-	public void debugging(int numFiles, String folder) throws Exception{
-
-		for (int i = 0; i < numFiles; i++){
-			//Read the test cases from the file
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(folder+"/tests"+i+".ser"));
-			List<TripleGPHolder> temp = (List<TripleGPHolder>) ois.readObject();
-			ois.close();
-		
-			for (int j = 0; j < temp.size(); j++){
-				TripleGPHolder test = temp.get(j);
-				System.out.println(Translator.translateToCypher(test.dbQeury));
-				
-				//System.out.println((test.policy));
-				
-			}
-			
-		}
-		
-		//for (int i = 0; i < numFiles; i++){
-		//Read the test cases from the file
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(folder+"/tests"+3+".ser"));
-		List<TripleGPHolder> temp = (List<TripleGPHolder>) ois.readObject();
-		ois.close();
-
-		//GPUtil.PrintStats(temp);
-		//for (int i = 0; i < temp.size(); i++){
-		TripleGPHolder test = temp.get(0);
-		String q = "Profile \n" +
-				"MATCH (Cb:PERSON) -[rela : RelD]->(Cd:PERSON)\n" + 
-				"MATCH (Ce:PERSON) -[reld : RelD]->(Cb:PERSON)\n" + 
-				"MATCH (Ca:PERSON) -[relg : RelC]->(Cd:PERSON)\n" +
-				"MATCH (Cd:PERSON) -[relb : RelG]->(Cb:PERSON)\n" + 
-				"MATCH (Cd:PERSON) -[relc : RelA]->(Ce:PERSON)\n" +
-				"MATCH (Cf:PERSON) -[relm : RelB]->(Cg:PERSON)\n" + 
-				"MATCH (Cg:PERSON) -[reli : RelA]->(Cf:PERSON)\n" + 
-				"MATCH (Ch:PERSON) -[relj : RelB]->(Cf:PERSON)\n" +
-				"MATCH (Ca:PERSON) -[relh : RelG]->(Ce:PERSON)\n" +
-				"MATCH (Ci:PERSON) -[relk : RelB]->(Cf:PERSON)\n" +
-				"MATCH (Ca:PERSON) -[rele : RelB]->(Cb:PERSON)\n" +
-				"MATCH (Ca:PERSON) -[relf : RelG]->(Cc:PERSON)\n" +
-				"MATCH (Ca:PERSON) -[rell : RelF]->(Cf:PERSON)\n" +
-				"WHERE Cb.`country of birth father`=\"United-States\" AND Ca.`country of birth self`=\"United-States\" AND Cc.`major occupation code`=\"Not in universe\" AND Cg.`id`=26892 AND Ci.`hispanic origin`=\"All other\" AND Ci.`migration code-move within reg`=\"Nonmover\" AND Ci.`own business or self employed`=0 AND relb.`weight`=2 AND relk.`weight`=7 AND rele.`weight`=5 AND relf.`weight`=4 AND rela.`weight`=3\n" + 
-				"RETURN distinct Ca";
-
-				Neo4jQueries nq = new Neo4jQueries(this.graphDb);
-		nq.setDebug(true);
-		nq.runQuery(q);
-		//}
-
-		//}
-
-		/*for (TripleGPHolder test :  temp){
-			System.out.println(test.dbQeury);
-			System.out.println(test.policy);
-			System.out.println(test.combined);
-
-			System.out.println(Translator.translateToCypher(test.combined));
-			executeTests(test, true, true);
-			//runCypherQuery(Translator.translateToCypher(test.combined));
-			return;
-			//GPCheckerFC gpFC = new GPCheckerFC(graphDb, test.dbQeury);
-			//gpFC.check();
-		}*/
-
-	}
-
 	/**
 	 * Runs the warmup tests.
 	 * @param The number of warmup tests to run
@@ -249,13 +183,7 @@ public class EvalTestRunner {
 
 		//Iterate through the parameters (query params on top, then the policy params)
 		for (int eq = 0; eq < endSize.length; eq++){
-			//for (int cq = 0; cq < complete.length; cq++){
-			//for (int mq = 0; mq < numMex.length; mq++){
-			//for (int aq = 0; aq < numAttr.length; aq++){
 			for (int ep = 1; ep < endSize.length; ep++){
-				//for (int cp = 0; cp < complete.length; cp++){
-				//for (int mp = 0; mp < numMex.length; mp++){
-				//for (int ap = 0; ap < numAttr.length; ap++){
 
 				List<TripleGPHolder> tests = new ArrayList<TripleGPHolder>();
 
@@ -306,12 +234,6 @@ public class EvalTestRunner {
 				count++;
 			}
 		}
-		//}
-		//}
-		//}
-		//}
-		//}
-		//}
 
 		//Return the number of files created
 		return count;
@@ -371,6 +293,25 @@ public class EvalTestRunner {
 		executeTests(tests, twoStep, comb);
 	}
 
+	public void executeSoloTest(GPHolder test){
+		GPCheckerFC gpFC = new GPCheckerFC(graphDb, test);
+		//Set a 6 second kill switch
+		Terminator term = new Terminator(gpFC);
+		term.terminateAfter(6000l);
+		//Run the algorithm and record the time
+		long start = System.nanoTime();
+		List<Map<MyNode, Node>> result = gpFC.check();
+		long end = System.nanoTime();
+		//Make sure the terminator is killed
+		term.nullifyObj();
+		term.stop();
+
+		long time = end - start;
+		//Print the performance time
+		
+		System.out.println(time);
+	}
+	
 	/**
 	 * Executes the given list of tests. The flags specify which algorithm(s) to run.
 	 * Assumed: At least one of the flags is true.
