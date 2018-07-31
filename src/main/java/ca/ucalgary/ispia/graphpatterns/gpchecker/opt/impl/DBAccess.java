@@ -102,9 +102,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 	}
 	
 	public Node findNode(MyNode src){
-		
 		return findNode(src, Integer.parseInt(src.getAttribute("id")));
-
 	}
 	
 	public Node findNode(MyNode src, Integer id){
@@ -112,7 +110,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		
 		try (Transaction tx = graphDb.beginTx()){
 			
-			tgt = graphDb.findNode(LabelEnum.Person, "id", id);
+			tgt = graphDb.findNode(LabelEnum.PERSON, "id", id);
 			
 			if (tgt == null){
 				//If the node is not found, return null

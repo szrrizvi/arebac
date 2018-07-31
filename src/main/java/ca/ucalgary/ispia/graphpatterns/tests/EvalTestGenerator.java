@@ -283,7 +283,7 @@ public class EvalTestGenerator {
 			//Find a random node from the database, using the unique id attribute
 			//Note: There are 82,168 nodes in this database. MAGIC NUMBER!
 			int nodeId = random.nextInt(82168);
-			node = graphDb.findNode(LabelEnum.Person, "id" , nodeId);
+			node = graphDb.findNode(LabelEnum.PERSON, "id" , nodeId);
 			tx.success();
 		}
 

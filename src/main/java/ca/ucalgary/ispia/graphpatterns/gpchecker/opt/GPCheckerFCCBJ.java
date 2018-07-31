@@ -169,13 +169,13 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		check_rec(assignments, candidates, confIn);
 
 		
-		DBAccess temp = (DBAccess) neighbourhoodAccess;
+		/*DBAccess temp = (DBAccess) neighbourhoodAccess;
 		Map<Integer, Integer> sizes = temp.neighbourhoodSizes;
 
 		System.out.println("DB Queries:");
 		for (Integer key : sizes.keySet()){
 			System.out.println(key + ", " + sizes.get(key));
-		}
+		}*/
 
 		return queryResults;
 	}

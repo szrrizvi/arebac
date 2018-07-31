@@ -47,7 +47,6 @@ public class SimpleCypherParser {
 		}
 		
 		List<GPHolder> list = new ArrayList<GPHolder>();
-		
 		//Convert each "combined" Cypher query into a Graph Pattern Holder object. 
 		//NOTE: We are ignoring the "dbQuery" and "policy" queries.
 		while(scan.hasNext()){
@@ -95,10 +94,26 @@ public class SimpleCypherParser {
 			//Assumption:The match statements come first, followed by a Where line (with multiple clauses), and then finally a Return statement.
 			if (line.startsWith("MATCH")){					//Match statement
 				//Extract the components
-				String src = line.substring(7, 9);			//The src node label
-				String rel = line.substring(20, 24);		//The relationship label
-				String relType = line.substring(27,31);		//The relationship type
-				String tgt = line.substring(35, 37);		//The tgt node label
+				
+				//The src node label
+				int srcStart = line.indexOf("(")+1;
+				int srcEnd = line.indexOf(":");
+				String src = line.substring(srcStart, srcEnd).trim();
+				
+				//The relationship label
+				int relStart = line.indexOf("[")+1;
+				int relEnd = line.indexOf(":", srcEnd+1);
+				String rel = line.substring(relStart, relEnd).trim();
+				
+				//The relationship type
+				int relTypeStart = relEnd+1;
+				int relTypeEnd = line.indexOf("]");
+				String relType = line.substring(relTypeStart, relTypeEnd).trim();
+				
+				//The tgt node label
+				int tgtStart = line.lastIndexOf("(")+1;
+				int tgtEnd = line.lastIndexOf(":");
+				String tgt = line.substring(tgtStart, tgtEnd).trim();		//The tgt node label
 				
 				//Obtain the corresponding MyNode objects for the src and tgt nodes.
 				MyNode srcNode = null;

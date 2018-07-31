@@ -1,34 +1,11 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.gpchecker.GPCheckerFC;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.AltStart;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.ConstraintsEvaluator;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerFCCBJ;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.VariableOrdering;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ConstraintsChecker;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
-import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
-import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.tests.EvalTestRunner;
-import ca.ucalgary.ispia.graphpatterns.tests.Killable;
-import ca.ucalgary.ispia.graphpatterns.util.Translator;
 /**
  * The driver.
  * @author szrrizvi
@@ -41,12 +18,31 @@ public class Driver {
 	 */
 	public static void main(String[] args){	
 
-		//SimpleCypherParser scp = new SimpleCypherParser("profile-1.txt");
-		//List<GPHolder> gphList = scp.parse();
-
-
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
+		
+		EvalTestRunner etr = new EvalTestRunner(graphDb);
+		//etr.warmup(250);
+		System.out.println("Warmup Complete\n");
+		etr.runTxtBasedTests(7);
+		System.out.println("Done");
+		
+		/*try (Transaction tx = graphDb.beginTx()){
+			
+
+			Node n = graphDb.getNodeById(62977);
+			
+			System.out.println(n);
+			Map<String, Object> props = n.getAllProperties();
+			
+			for (String key : props.keySet()){
+				System.out.println(key + ": " + props.get(key));
+			}
+			
+			
+			tx.success();
+		}*/
+		
 		//GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 		//d.runTests(gphList, graphDb);
 		//d.runTest(gphList.get(103), graphDb);
