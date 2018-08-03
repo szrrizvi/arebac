@@ -1,11 +1,15 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
+import java.util.Random;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.tests.EvalTestRunner;
+import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
+import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
+import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
+import ca.ucalgary.ispia.graphpatterns.tests.SubgraphGenerator;
 /**
  * The driver.
  * @author szrrizvi
@@ -21,7 +25,25 @@ public class Driver {
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 		
-		EvalTestRunner etr = new EvalTestRunner(graphDb);
+		for (int i = 0; i < 10; i++){
+			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, new Random(), 10, 4d, 1, 1, 1, 1);
+			GPHolder gph = sg.createDBBasedGP();
+			if (gph== null){
+				i--;
+			} else {
+				for (MyRelationship rel : gph.getGp().getAllRelationships()){
+					MyNode src = rel.getSource();
+					MyNode tgt = rel.getTarget();
+					
+					System.out.println(src.getId() + "->" + tgt.getId());
+				}
+				System.out.println("DONE");
+			}
+			
+		}
+		
+		
+		/*EvalTestRunner etr = new EvalTestRunner(graphDb);
 		//etr.warmup(250);
 		System.out.println("Warmup Complete\n");
 		etr.runTxtBasedTests(7);
