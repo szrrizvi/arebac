@@ -25,19 +25,13 @@ public class Driver {
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 		
-		for (int i = 0; i < 10; i++){
+		for (int i = 0; i < 1000; i++){
 			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, new Random(), 10, 4d, 1, 1, 1, 1);
 			GPHolder gph = sg.createDBBasedGP();
 			if (gph== null){
 				i--;
 			} else {
-				for (MyRelationship rel : gph.getGp().getAllRelationships()){
-					MyNode src = rel.getSource();
-					MyNode tgt = rel.getTarget();
-					
-					System.out.println(src.getId() + "->" + tgt.getId());
-				}
-				System.out.println("DONE");
+
 			}
 			
 		}
