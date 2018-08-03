@@ -29,8 +29,11 @@ import ca.ucalgary.ispia.graphpatterns.util.Pair;
 /**
  * This class generates the test cases for the evaluation process.
  * @author szrrizvi
+ * 
+ * @deprecated Use SubgraphGenerator 
  *
  */
+@Deprecated
 public class EvalTestGenerator {
 
 	private Random random;					//Random number generator

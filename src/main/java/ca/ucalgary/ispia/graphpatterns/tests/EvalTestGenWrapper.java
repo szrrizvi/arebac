@@ -19,23 +19,21 @@ import ca.ucalgary.ispia.graphpatterns.util.GPUtil;
 import ca.ucalgary.ispia.graphpatterns.util.Pair;
 
 /**
- * This is the wrapper class for the evaluation process.
+ * This is the wrapper class for generating test cases (TripleGPHolder objects).
  * @author szrrizvi
  *
  */
 public class EvalTestGenWrapper {
 	private GraphDatabaseService graphDb;	//The graph database interface
 	private Random random;					//The random number generator
-	private int nodesSeedSize;				//The number of nodes to use as the seed for the second GPH
+	private int totalDBNodes;				//Total number of nodes in the database
 
 	//Parameters for the database query (first graph pattern)
 	private int endSizeA, rootedA, numMexA, numVAttrsA, numEAttrsA;
-	private float pA;
 	private double completeA;
 
 	//Parameters for the access control policy (second graph pattern)
 	private int endSizeB, rootedB, numMexB, numVAttrsB, numEAttrsB;
-	private float pB;
 	private double completeB;
 
 	//flags to check if parameters have been set
@@ -46,11 +44,10 @@ public class EvalTestGenWrapper {
 	 * @param graphDb The graph database interface
 	 * @param random The pseudorandom number generator
 	 */
-	public EvalTestGenWrapper(GraphDatabaseService graphDb, Random random, int nodesSeedSize){
+	public EvalTestGenWrapper(GraphDatabaseService graphDb, Random random, int totalDBNodes){
 		this.graphDb = graphDb;
 		this.random = random;
-		this.nodesSeedSize = nodesSeedSize;
-
+		this.totalDBNodes = totalDBNodes;
 
 		this.paramsASet = false;
 		this.paramsBSet = false;
@@ -66,11 +63,10 @@ public class EvalTestGenWrapper {
 	 * @param numVAttrs
 	 * @param numEAttrs
 	 */
-	public void setParamsA(int endSize, double complete, int rooted, float p, int numMex, int numVAttrs, int numEAttrs){
+	public void setParamsA(int endSize, double complete, int rooted, int numMex, int numVAttrs, int numEAttrs){
 		this.endSizeA = endSize;
 		this.completeA = complete;
 		this.rootedA = rooted;
-		this.pA = p;
 		this.numMexA = numMex;
 		this.numVAttrsA = numVAttrs;
 		this.numEAttrsA = numEAttrs;
@@ -88,11 +84,10 @@ public class EvalTestGenWrapper {
 	 * @param numVAttrs
 	 * @param numEAttrs
 	 */
-	public void setParamsB(int endSize, double complete, int rooted, float p, int numMex, int numVAttrs, int numEAttrs){
+	public void setParamsB(int endSize, double complete, int rooted, int numMex, int numVAttrs, int numEAttrs){
 		this.endSizeB = endSize;
 		this.completeB = complete;
 		this.rootedB = rooted;
-		this.pB = p;
 		this.numMexB = numMex;
 		this.numVAttrsB = numVAttrs;
 		this.numEAttrsB = numEAttrs;
@@ -113,8 +108,8 @@ public class EvalTestGenWrapper {
 			return null;
 		}
 
-		EvalTestGenerator etgA = null;
-		EvalTestGenerator etgB = null;
+		SubgraphGenerator genA = null;
+		SubgraphGenerator genB = null;
 
 		boolean gpADone =false;
 		boolean gpBDone = false;
@@ -123,8 +118,8 @@ public class EvalTestGenWrapper {
 		GPHolder gpA = null;
 		while (!gpADone){
 			//Keep looping until we get a non-null result.
-			etgA = new EvalTestGenerator(graphDb, random, endSizeA, completeA, rootedA, pA, numMexA, numVAttrsA, numEAttrsA);
-			gpA = etgA.createDBBasedGP();
+			genA = new SubgraphGenerator(graphDb, totalDBNodes, random, endSizeA, completeA, rootedA, numMexA, numVAttrsA, numEAttrsA);
+			gpA = genA.createDBBasedGP();
 			if (gpA != null){
 				gpADone = true;
 			}
@@ -132,8 +127,7 @@ public class EvalTestGenWrapper {
 
 		//Extract the nodes to use as the seed for the policy query.
 		//Additionally, these nodes will also have an actor mapping
-
-		Map<Node, MyNode> nodesMap = etgA.extractNodes(nodesSeedSize);
+		Map<Node, MyNode> nodesMap = genA.extractNodes(1);
 
 		List<MyNode> resultSchema = new ArrayList<MyNode>();
 		List<Node> nodes = new ArrayList<Node>();
@@ -153,8 +147,8 @@ public class EvalTestGenWrapper {
 		GPHolder gpB = null;
 		while(!gpBDone){
 			//Keep looping until we get a non-null result.
-			etgB = new EvalTestGenerator(graphDb, random, endSizeB, completeB, rootedB, pB, numMexB, numVAttrsB, numEAttrsB);
-			gpB = etgB.createDBBasedGP(nodes);
+			genB = new SubgraphGenerator(graphDb, totalDBNodes, random, endSizeB, completeB, rootedB, pB, numMexB, numVAttrsB, numEAttrsB);
+			gpB = genB.createDBBasedGP(nodes);
 			if (gpB != null){
 				gpBDone = true;
 			}
@@ -164,8 +158,8 @@ public class EvalTestGenWrapper {
 		//Set the actMap for gpB
 		Map<String, MyNode> actMapB = new HashMap<String, MyNode>();
 		for (Node node : nodesMap.keySet()){
-			MyNode first = etgA.findMyNode(node);
-			MyNode second = etgB.findMyNode(node);
+			MyNode first = genA.findMyNode(node);
+			MyNode second = genB.findMyNode(node);
 
 			//Find the key name mapped to first
 			String keyName = null;
@@ -183,16 +177,7 @@ public class EvalTestGenWrapper {
 		}
 		gpB.setActMap(actMapB);
 
-		GPHolder gpC = combineGPs(etgA, etgB, nodes);
-
-		/*System.out.println(gpA.getGp());
-		System.out.println("-----");
-		System.out.println(gpB.getGp());
-		System.out.println("-----");
-		System.out.println(gpC.getGp());
-		System.out.println("XXXXX\n\n");
-		 */
-
+		GPHolder gpC = combineGPs(genA, genB, nodes);
 
 		return new TripleGPHolder(gpA, gpB, gpC);
 	}	
