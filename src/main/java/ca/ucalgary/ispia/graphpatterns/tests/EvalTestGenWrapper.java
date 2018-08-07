@@ -130,16 +130,18 @@ public class EvalTestGenWrapper {
 		Map<Node, MyNode> nodesMap = genA.extractNodes(1);
 
 		List<MyNode> resultSchema = new ArrayList<MyNode>();
-		List<Node> nodes = new ArrayList<Node>();
+		Node seedNode = null;
 		Map<String, MyNode> actMap = new HashMap<String, MyNode>();
 		int counter = 1;
 
+		//Note that nodesMap constains a single mapping
 		for (Node node : nodesMap.keySet()){
-			nodes.add(node);
+			seedNode = node;
 			resultSchema.add(nodesMap.get(node));
 			actMap.put("act"+counter, nodesMap.get(node));
 			counter++;
 		}
+
 		gpA.setResultSchema(resultSchema);
 		gpA.setActMap(actMap);
 
@@ -147,8 +149,8 @@ public class EvalTestGenWrapper {
 		GPHolder gpB = null;
 		while(!gpBDone){
 			//Keep looping until we get a non-null result.
-			genB = new SubgraphGenerator(graphDb, totalDBNodes, random, endSizeB, completeB, rootedB, pB, numMexB, numVAttrsB, numEAttrsB);
-			gpB = genB.createDBBasedGP(nodes);
+			genB = new SubgraphGenerator(graphDb, totalDBNodes, random, endSizeB, completeB, rootedB, numMexB, numVAttrsB, numEAttrsB);
+			gpB = genB.createDBBasedGP(seedNode);
 			if (gpB != null){
 				gpBDone = true;
 			}
@@ -177,23 +179,23 @@ public class EvalTestGenWrapper {
 		}
 		gpB.setActMap(actMapB);
 
-		GPHolder gpC = combineGPs(genA, genB, nodes);
+		GPHolder gpC = combineGPs(genA, genB, seedNode);
 
 		return new TripleGPHolder(gpA, gpB, gpC);
 	}	
 
 	/**
 	 * Combines two GPHolders into a single GPHolder.
-	 * @param etgA The source for the first GPHolder.
-	 * @param etgB The source for the second GPHolder.
+	 * @param genA The source for the first GPHolder.
+	 * @param genB The source for the second GPHolder.
 	 * @param seeds The seeds used for overlapping the second GP with the first.
 	 * @return The combined GPHolder
 	 */
-	private GPHolder combineGPs(EvalTestGenerator etgA, EvalTestGenerator etgB, List<Node> seeds){
+	private GPHolder combineGPs(SubgraphGenerator genA, SubgraphGenerator genB, Node seedNode){
 
 		//Extract the graph patterns
-		GraphPattern gpA = etgA.getGPHolder().getGp();
-		GraphPattern gpB = etgB.getGPHolder().getGp();
+		GraphPattern gpA = genA.getGPHolder().getGp();
+		GraphPattern gpB = genB.getGPHolder().getGp();
 
 		//The list of nodes for the new graph pattern
 		List<MyNode> nodes = new ArrayList<MyNode> ();
@@ -208,35 +210,32 @@ public class EvalTestGenWrapper {
 		int relCount = 0;
 		String nodePrefix = "C";
 		String relPrefix = "rel";
-		
+
 		List<MyNode> resultSchema = new ArrayList<MyNode>();
 
-		//For each seed, create a single node and map the nodes from the input GPs to the new node
-		for (Node n : seeds){
-			//Create the new node
-			MyNode newNode = new MyNode(nodeCount, "PERSON");
-			nodeCount++;
-			
+		//For the seed, create a single node and map that node from the input GPs to the new node
+		//Create the new node
+		MyNode newNode = new MyNode(nodeCount, "PERSON");
+		nodeCount++;
 
-			//Add it to the nodes list
-			nodes.add(newNode);
+		//Add it to the nodes list
+		nodes.add(newNode);
 
-			//Find the corresponding original nodes, and map them to the new node
-			MyNode temp1 = etgA.findMyNode(n);
-			nodesMap.put(temp1, newNode);
-			seenNodes.add(temp1);
-			MyNode temp2 = etgB.findMyNode(n);
-			nodesMap.put(temp2, newNode);
-			seenNodes.add(temp2);
+		//Find the corresponding original nodes, and map them to the new node
+		MyNode temp1 = genA.findMyNode(seedNode);
+		nodesMap.put(temp1, newNode);
+		seenNodes.add(temp1);
+		MyNode temp2 = genB.findMyNode(seedNode);
+		nodesMap.put(temp2, newNode);
+		seenNodes.add(temp2);
 
-			addAttrs(temp1, newNode);
-			addAttrs(temp2, newNode);
-			resultSchema.add(newNode);
-		}
+		addAttrs(temp1, newNode);
+		addAttrs(temp2, newNode);
+		resultSchema.add(newNode);
 
 		//Generate the actMap for the combine GPHolder
 		Map<String, MyNode> actMap = new HashMap<String, MyNode>();
-		Map<String, MyNode> sourceActMap = etgA.getGPHolder().getActMap();
+		Map<String, MyNode> sourceActMap = genA.getGPHolder().getActMap();
 		for (String key : sourceActMap.keySet()){
 			MyNode src = sourceActMap.get(key);
 			actMap.put(key, nodesMap.get(src));
@@ -247,15 +246,15 @@ public class EvalTestGenWrapper {
 		for (MyNode node : gpA.getNodes()){
 			if (!seenNodes.contains(node)){
 				//Create the node
-				MyNode newNode = new MyNode(nodeCount, "PERSON");
+				MyNode newNodeB = new MyNode(nodeCount, "PERSON");
 				nodeCount++;
-				
+
 
 				//Update the mapping
-				nodesMap.put(node, newNode);
+				nodesMap.put(node, newNodeB);
 				seenNodes.add(node);
 
-				addAttrs(node, newNode);
+				addAttrs(node, newNodeB);
 			}
 		}
 
@@ -263,14 +262,14 @@ public class EvalTestGenWrapper {
 		for (MyNode node : gpB.getNodes()){
 			if (!seenNodes.contains(node)){
 				//Create the node
-				MyNode newNode = new MyNode(nodeCount, "PERSON");
+				MyNode newNodeB = new MyNode(nodeCount, "PERSON");
 				nodeCount++;
-				
+
 				//Update the mapping
-				nodesMap.put(node, newNode);
+				nodesMap.put(node, newNodeB);
 				seenNodes.add(node);
 
-				addAttrs(node, newNode);
+				addAttrs(node, newNodeB);
 			}
 		}
 
@@ -288,12 +287,12 @@ public class EvalTestGenWrapper {
 			//Generate the relationships
 			MyRelationship r = new MyRelationship(src, tgt, type, relCount);
 			relCount++;
-			
+
 			if (relCount == 26){
 				relCount = 0;
 				relPrefix = relPrefix + "l";
 			}
-			
+
 			addAttrs(rel, r);
 			gp.addRelationship(r);
 		}
@@ -312,7 +311,7 @@ public class EvalTestGenWrapper {
 				relCount = 0;
 				relPrefix = relPrefix + "l";
 			}
-			
+
 			addAttrs(rel, r);
 			gp.addRelationship(r);
 
@@ -324,13 +323,13 @@ public class EvalTestGenWrapper {
 
 
 		//Mutual exclusion constraints for gpA
-		for(Pair<MyNode, MyNode> mex : etgA.getGPHolder().getMexList()){
+		for(Pair<MyNode, MyNode> mex : genA.getGPHolder().getMexList()){
 			Pair<MyNode, MyNode> newMex = new Pair<MyNode, MyNode>(nodesMap.get(mex.first), nodesMap.get(mex.second));
 			mexList.add(newMex);
 		}
 
 		//Mutual exclusion constraints for gpB
-		for(Pair<MyNode, MyNode> mex : etgB.getGPHolder().getMexList()){
+		for(Pair<MyNode, MyNode> mex : genB.getGPHolder().getMexList()){
 			Pair<MyNode, MyNode> newMex = new Pair<MyNode, MyNode>(nodesMap.get(mex.first), nodesMap.get(mex.second));
 			mexList.add(newMex);
 		}

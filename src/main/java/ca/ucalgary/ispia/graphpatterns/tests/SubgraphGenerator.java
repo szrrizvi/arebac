@@ -246,6 +246,23 @@ public class SubgraphGenerator {
 		return result;
 	}
 	
+	/**
+	 * Finds the corresponding MyNode object for the input Node argument.
+	 * @param node The input node argument.
+	 * @return The MyNode object mapped to the input Node object.
+	 */
+	public MyNode findMyNode(Node node){
+		return nodesMap.get(node);
+	}
+	
+	/**
+	 * @return The GPHolder object
+	 */
+	public GPHolder getGPHolder(){
+		return this.gpHolder;
+	}
+
+	
 	//////////////////////////////////////
 	//									//
 	// The Two Main Phases				//

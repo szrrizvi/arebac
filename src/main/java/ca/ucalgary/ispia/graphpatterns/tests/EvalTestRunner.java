@@ -317,8 +317,8 @@ public class EvalTestRunner {
 			//Generate the test case
 			EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
 			//etw.setParamsA(esA, 0.5d, 2, 0.01f, nmA, ncA, ncA);
-			etw.setParamsA(2, 0.1d, 0, 0.001f, 0, 1, 0);
-			etw.setParamsB(esB, 0.1d, 2, 0.01f, nmB, ncB, ncB);
+			etw.setParamsA(2, 0.1d, 0, 0, 1, 0);
+			etw.setParamsB(esB, 0.1d, 2, nmB, ncB, ncB);
 			TripleGPHolder test = etw.generateTests();
 
 			//Randomly decide which algorithm(s) to run.
@@ -422,8 +422,8 @@ public class EvalTestRunner {
 
 				
 				EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
-				etw.setParamsA(eq, compQ, 0, 0.01f, mq, aq, rq);
-				etw.setParamsB(ep, compP, 1, 0.01f, mp, ap, rp);
+				etw.setParamsA(eq, compQ, 0, mq, aq, rq);
+				etw.setParamsB(ep, compP, 1, mp, ap, rp);
 
 				TripleGPHolder test = etw.generateTests();
 				tests.add(test);	
@@ -498,8 +498,8 @@ public class EvalTestRunner {
 				//Generate 50 cases for the profile, and add them to the list
 				for (int idx = 0; idx < 50; idx++){
 					EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
-					etw.setParamsA(endSize[eq], cq, 0, 0.01f, mq, aq, aq);
-					etw.setParamsB(endSize[ep], cp, 2, 0.01f, mp, ap, ap);
+					etw.setParamsA(endSize[eq], cq, 0, mq, aq, aq);
+					etw.setParamsB(endSize[ep], cp, 2, mp, ap, ap);
 
 					TripleGPHolder test = etw.generateTests();
 					tests.add(test);	
