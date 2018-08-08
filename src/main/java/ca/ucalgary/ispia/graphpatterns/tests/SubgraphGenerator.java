@@ -133,9 +133,6 @@ public class SubgraphGenerator {
 				return null; 
 			}
 
-		for (Node n : allNodes){
-			System.out.println(n);
-		}
 		
 		//Translate the allNodes and rels lists to GraphPattern
 		GraphPattern gp = translateToGP(); 
@@ -143,8 +140,14 @@ public class SubgraphGenerator {
 		//Generate the mutual exclusion constraints
 		List<Pair<MyNode, MyNode>> mex = generateMex(gp.getNodes());
 
-		//Generate and return the GPHolder
+		//Generate the GPHolder
 		this.gpHolder = new GPHolder(gp, mex, new HashMap<String, MyNode>());
+		//Set the result schema (single node)
+		MyNode resNode = gp.getNodes().get(random.nextInt(endSize));
+		List<MyNode> resultSchema = new ArrayList<MyNode>();
+		resultSchema.add(resNode);
+		this.gpHolder.setResultSchema(resultSchema);
+		
 		return this.gpHolder;
 	}
 
@@ -319,6 +322,8 @@ public class SubgraphGenerator {
 	 */
 	private void phaseTwo(){
 
+		List<Pair<Node, Node>> pairs = new ArrayList<Pair<Node, Node>>();
+		
 		//For each node in allNode, get all relationshpis and iterate through each relationship.
 		for (Node n1 : allNodes){
 
@@ -332,7 +337,19 @@ public class SubgraphGenerator {
 
 					if (allNodes.contains(n2) && !n1.equals(n2)){					//If n2 is part of allNodes and n1 != n2
 						if (!rels.contains(rel)){									//If the relationship is not already part of rels
-							rels.add(rel);											//Add the relationship to the lists.
+							Pair<Node, Node> forwardPair = new Pair<Node, Node>(n1, n2);
+							Pair<Node, Node> backwardPair = new Pair<Node, Node>(n2, n1);
+							if (!pairs.contains(forwardPair) && !pairs.contains(backwardPair)){
+								rels.add(rel);											//Add the relationship to the lists.
+								pairs.add(forwardPair);
+								pairs.add(backwardPair);
+							} else {
+								/*if(random.nextBoolean()){
+									rels.add(rel);
+									pairs.add(forwardPair);
+									pairs.add(backwardPair);
+								}*/
+							}
 						}
 					}
 				}

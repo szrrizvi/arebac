@@ -1,15 +1,15 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.util.Random;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.List;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
-import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
-import ca.ucalgary.ispia.graphpatterns.tests.SubgraphGenerator;
 /**
  * The driver.
  * @author szrrizvi
@@ -24,58 +24,64 @@ public class Driver {
 
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
-		
-		for (int i = 0; i < 1000; i++){
-			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, new Random(), 10, 4d, 1, 1, 1, 1);
-			GPHolder gph = sg.createDBBasedGP();
-			if (gph== null){
-				i--;
-			} else {
 
+		/*Random rand = new Random(5523397);
+		int[] sizes = {5, 7, 10, 9, 11, 13};
+		int[] attrs = {1, 2, 4};
+		int[] mex = {0, 1, 2};
+		int count = 1;
+		for (int size : sizes){
+			List<GPHolder> tests = new ArrayList<GPHolder>();
+			for (int i = 0; i < 1000; i++){
+				int vattrs = rand.nextInt(attrs.length);
+				int eattrs = rand.nextInt(attrs.length);
+				int mexs = rand.nextInt(mex.length);
+				SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.5d, 1, mex[mexs], attrs[vattrs], attrs[eattrs]);
+				
+				GPHolder gph = sg.createDBBasedGP();
+				if (gph == null){
+					i--;
+				} else {
+					tests.add(gph);
+				}
 			}
-			
+			try {
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("testCaseB-"+count+".ser"));
+				count++;
+				oos.writeObject(tests);
+				oos.close();
+			} catch (Exception e){
+				e.printStackTrace();
+				return;
+			}
+		}*/
+		
+		//EvalTestRunner etr = new EvalTestRunner(graphDb);
+		//etr.warmup(250);
+		//System.out.println("Done Warmup\n");
+		//etr.runGPHTestsList("testCase", 6);
+		
+		
+		 List<GPHolder> tests = null;
+		 try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("testCaseB-6.ser"));
+			tests = (List<GPHolder>) ois.readObject();
+			ois.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		
+		for (GPHolder test : tests){
+			List<MyRelationship> rels = test.getGp().getAllRelationships();
+			for (MyRelationship rel : rels){
+				System.out.println(rel.getSource().getId() + "->" + rel.getTarget().getId());
+			}
+			System.out.println();
 		}
 		
 		
-		/*EvalTestRunner etr = new EvalTestRunner(graphDb);
-		//etr.warmup(250);
-		System.out.println("Warmup Complete\n");
-		etr.runTxtBasedTests(7);
-		System.out.println("Done");
-		
-		/*try (Transaction tx = graphDb.beginTx()){
-			
-
-			Node n = graphDb.getNodeById(62977);
-			
-			System.out.println(n);
-			Map<String, Object> props = n.getAllProperties();
-			
-			for (String key : props.keySet()){
-				System.out.println(key + ": " + props.get(key));
-			}
-			
-			
-			tx.success();
-		}*/
-		
-		//GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
-		//d.runTests(gphList, graphDb);
-		//d.runTest(gphList.get(103), graphDb);
-
-
-		//Random random = new Random(621901);
-		//SimTestGenWrapper.generateSimTests(graphDb, "slashdot1rid", random);
-
-		/*
-		try {
-			SimTestRunner str = new SimTestRunner(graphDb);
-			str.runTest("simulation-tests/Slashdot0902tests/", 3, 551);
-			str.runTests(1, "simulation-tests/slashdot1ridtests/");
-		} catch (Exception e){
-			System.out.println(e);
-		}*/
-
 		graphDb.shutdown();
 	}
 

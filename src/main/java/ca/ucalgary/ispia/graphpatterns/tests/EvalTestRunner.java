@@ -1,7 +1,9 @@
 package ca.ucalgary.ispia.graphpatterns.tests;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -57,9 +59,40 @@ public class EvalTestRunner {
 	//													 //
 	///////////////////////////////////////////////////////
 	
-	public void runTxtBasedTests(int numProfiles){
+	/**
+	 * Runs the GPH Test cases.
+	 * Precondition: Each file contains a list of GPHolder objects.
+	 * @param fileNamePrefix The name of the file: fileNamePrefix + "-" + i + ".ser"
+	 * @param numProfiles The number of files to read (starting at 1)
+	 */
+	public void runGPHTestsList(String fileNamePrefix, int numProfiles){
 		for (int i = 1; i <= numProfiles; i++){
-			SimpleCypherParser scp = new SimpleCypherParser("profile-" + i + ".txt");
+			ObjectInputStream ois = null;
+			List<GPHolder> tests = null;
+			try {
+				ois = new ObjectInputStream(new FileInputStream(fileNamePrefix +"-" + i + ".ser"));
+				tests = (List<GPHolder>) ois.readObject();
+				ois.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			for (GPHolder test : tests){
+				//executeSoloTest(test);
+				executeSoloTestFC(test);
+			}
+		}
+	}
+	
+	/**
+	 * Runs the test cases provided in text based format
+	 * @param fileNamePrefix The name of the file: fileNamePrefix + "-" + i + ".ser"
+	 * @param numProfiles The number of files to read (starting at 1)
+	 */
+	public void runTxtBasedTests(String fileNamePrefix, int numProfiles){
+		for (int i = 1; i <= numProfiles; i++){
+			SimpleCypherParser scp = new SimpleCypherParser(fileNamePrefix + "-" + i + ".txt");
 			List<GPHolder> gphList = scp.parse();
 
 			for (GPHolder test : gphList){
@@ -114,6 +147,28 @@ public class EvalTestRunner {
 		AltStart<Node> as = new AttrBasedStart(graphDb, ce);
 		
 		GPCheckerFCCBJ<Node, Entity> gpEval = new GPCheckerFCCBJ<Node, Entity>(test, ce, neighbourhoodAccess, variableOrdering, as);
+		
+		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
+		//Set a 6 second kill switch
+		Terminator term = new Terminator(gpEval);
+		term.terminateAfter(6000l);
+		//Run the algorithm and record the time
+		long start = System.nanoTime();
+		List<Map<MyNode, Node>> result = gpEval.check();
+		long end = System.nanoTime();
+		//Make sure the terminator is killed
+		term.nullifyObj();
+		term.stop();
+
+		long time = end - start;
+		
+		//Print the performance time
+		System.out.println(time);
+	}
+	
+	public void executeSoloTestFC(GPHolder test){
+		
+		GPCheckerFC gpEval = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
 		term.terminateAfter(6000l);
@@ -330,7 +385,8 @@ public class EvalTestRunner {
 			}
 
 			//Run the test case
-			executeTests(test, true, true);
+			executeSoloTest(test.combined);
+			//executeTests(test, true, true);
 		}
 	}
 	
