@@ -124,16 +124,17 @@ public class SubgraphGenerator {
 		//For all pairs of nodes in allNodes, if a relationship exists between them
 		//in the database, then ensure that relationship also exists in rels.
 		phaseTwo();
+		phaseTwoB();
 
 		//Make sure that gp passes the minimum number of relationships requirement. 
-			int minRels = (int)Math.floor((allNodes.size()-1)*complete);
+		int minRels = (int)Math.floor((allNodes.size()-1)*complete);
 
-			if (rels.size() < minRels){
-				System.out.println("failed here: " + complete + ", " + minRels + " " + rels.size() + " " + allNodes.size());
-				return null; 
-			}
+		if (rels.size() < minRels){
+			System.out.println("failed here: " + complete + ", " + minRels + " " + rels.size() + " " + allNodes.size());
+			return null; 
+		}
 
-		
+
 		//Translate the allNodes and rels lists to GraphPattern
 		GraphPattern gp = translateToGP(); 
 
@@ -147,11 +148,11 @@ public class SubgraphGenerator {
 		List<MyNode> resultSchema = new ArrayList<MyNode>();
 		resultSchema.add(resNode);
 		this.gpHolder.setResultSchema(resultSchema);
-		
+
 		return this.gpHolder;
 	}
 
-	
+
 	/**
 	 * Picks random nodes, and their appropriate MyNode mapping, from the list of nodes.
 	 * @param numNodes The number of nodes to pick.
@@ -248,7 +249,7 @@ public class SubgraphGenerator {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Finds the corresponding MyNode object for the input Node argument.
 	 * @param node The input node argument.
@@ -257,7 +258,7 @@ public class SubgraphGenerator {
 	public MyNode findMyNode(Node node){
 		return nodesMap.get(node);
 	}
-	
+
 	/**
 	 * @return The GPHolder object
 	 */
@@ -265,7 +266,7 @@ public class SubgraphGenerator {
 		return this.gpHolder;
 	}
 
-	
+
 	//////////////////////////////////////
 	//									//
 	// The Two Main Phases				//
@@ -315,6 +316,39 @@ public class SubgraphGenerator {
 		return;
 	}
 
+	private void phaseTwoB(){
+
+		List<Relationship> tempRels = new ArrayList<Relationship>();
+
+		for (Node n1 : allNodes){
+			for (Node n2 : allNodes){
+				if (!n1.equals(n2)){
+					try (Transaction tx = graphDb.beginTx()){
+						Iterable<Relationship> ite = n1.getRelationships(Direction.OUTGOING);
+
+						for (Relationship rel : ite){
+							Node tgt = rel.getEndNode();
+
+							if (tgt.equals(n2)){
+								tempRels.add(rel);
+							}
+						}
+
+						tx.success();
+					}
+				}
+			}
+		}
+		System.out.println("PhaseTwoB");
+		for (Relationship rel : tempRels){
+			try (Transaction tx = graphDb.beginTx()){
+				System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
+				tx.success();
+			}
+		}
+		System.out.println();
+	}
+
 
 	/**
 	 * Finds all relationships in the database, between the nodes in allNodes, then adds them to
@@ -323,7 +357,7 @@ public class SubgraphGenerator {
 	private void phaseTwo(){
 
 		List<Pair<Node, Node>> pairs = new ArrayList<Pair<Node, Node>>();
-		
+
 		//For each node in allNode, get all relationshpis and iterate through each relationship.
 		for (Node n1 : allNodes){
 
@@ -337,26 +371,35 @@ public class SubgraphGenerator {
 
 					if (allNodes.contains(n2) && !n1.equals(n2)){					//If n2 is part of allNodes and n1 != n2
 						if (!rels.contains(rel)){									//If the relationship is not already part of rels
-							Pair<Node, Node> forwardPair = new Pair<Node, Node>(n1, n2);
-							Pair<Node, Node> backwardPair = new Pair<Node, Node>(n2, n1);
-							if (!pairs.contains(forwardPair) && !pairs.contains(backwardPair)){
-								rels.add(rel);											//Add the relationship to the lists.
-								pairs.add(forwardPair);
-								pairs.add(backwardPair);
-							} else {
-								/*if(random.nextBoolean()){
+							//Pair<Node, Node> forwardPair = new Pair<Node, Node>(n1, n2);
+							//Pair<Node, Node> backwardPair = new Pair<Node, Node>(n2, n1);
+							//if (!pairs.contains(forwardPair) && !pairs.contains(backwardPair)){
+							rels.add(rel);											//Add the relationship to the lists.
+							//pairs.add(forwardPair);
+							//pairs.add(backwardPair);
+							//} else {
+							/*if(random.nextBoolean()){
 									rels.add(rel);
 									pairs.add(forwardPair);
 									pairs.add(backwardPair);
 								}*/
-							}
+							//}
 						}
 					}
 				}
 				tx.success();
 			}
 		}
-		
+
+		System.out.println("PhaseTwo");
+		for (Relationship rel : rels){
+			try (Transaction tx = graphDb.beginTx()){
+				System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
+				tx.success();
+			}
+		}
+		System.out.println();
+
 		return;
 	}
 
@@ -382,7 +425,7 @@ public class SubgraphGenerator {
 		}
 		return node;
 	}
-	
+
 	/**
 	 * Uses the lists allNodes and rels to generate a graph pattern
 	 * @return A graph pattern based on the contents of allNodes and rels
@@ -399,7 +442,7 @@ public class SubgraphGenerator {
 			MyNode myNode = new MyNode(nodeCount, "PERSON");
 			nodesMap.put(n, myNode);
 			gp.addNode(myNode);
-			
+
 			nodeCount++;
 		}
 
@@ -431,7 +474,7 @@ public class SubgraphGenerator {
 		//Process the relationships
 		int relCount = 0;
 		String relPrefix = "rel";
-		
+
 		for (Relationship r : rels){
 
 			MyNode source = null, target = null;
@@ -447,7 +490,7 @@ public class SubgraphGenerator {
 
 			MyRelationship rel = new MyRelationship(source, target, type, relCount);
 			relCount++;
-			
+
 			if (relCount >= 25){
 				relCount = 0;
 				relPrefix = relPrefix + "l";
@@ -483,10 +526,10 @@ public class SubgraphGenerator {
 				result.add(mex);
 			}
 		}
-		
+
 		//Shuffle the result list for random order.
 		Collections.shuffle(result, random);
-		
+
 		//Repeatedly remove constraints from the list until we reach the numMex size.
 		while (result.size() > numMex){
 			result.remove(random.nextInt(result.size()));
@@ -581,5 +624,5 @@ public class SubgraphGenerator {
 			}
 		}		
 	}
-	
+
 }

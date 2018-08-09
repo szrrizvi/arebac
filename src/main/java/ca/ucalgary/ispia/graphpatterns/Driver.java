@@ -1,15 +1,18 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
+import ca.ucalgary.ispia.graphpatterns.tests.SubgraphGenerator;
 /**
  * The driver.
  * @author szrrizvi
@@ -25,14 +28,15 @@ public class Driver {
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
 
-		/*Random rand = new Random(5523397);
-		int[] sizes = {5, 7, 10, 9, 11, 13};
+		Random rand = new Random(5523397);
+		//int[] sizes = {5, 7, 10, 9, 11, 13};
+		int[] sizes = {13};
 		int[] attrs = {1, 2, 4};
 		int[] mex = {0, 1, 2};
 		int count = 1;
 		for (int size : sizes){
 			List<GPHolder> tests = new ArrayList<GPHolder>();
-			for (int i = 0; i < 1000; i++){
+			for (int i = 0; i < 10; i++){
 				int vattrs = rand.nextInt(attrs.length);
 				int eattrs = rand.nextInt(attrs.length);
 				int mexs = rand.nextInt(mex.length);
@@ -45,7 +49,8 @@ public class Driver {
 					tests.add(gph);
 				}
 			}
-			try {
+			
+			/*try {
 				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("testCaseB-"+count+".ser"));
 				count++;
 				oos.writeObject(tests);
@@ -53,16 +58,16 @@ public class Driver {
 			} catch (Exception e){
 				e.printStackTrace();
 				return;
-			}
-		}*/
+			}*/
+		}
 		
 		//EvalTestRunner etr = new EvalTestRunner(graphDb);
 		//etr.warmup(250);
 		//System.out.println("Done Warmup\n");
-		//etr.runGPHTestsList("testCase", 6);
+		//etr.runGPHTestsList("testCaseB", 6);
 		
 		
-		 List<GPHolder> tests = null;
+		 /*List<GPHolder> tests = null;
 		 try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("testCaseB-6.ser"));
 			tests = (List<GPHolder>) ois.readObject();
@@ -79,7 +84,7 @@ public class Driver {
 				System.out.println(rel.getSource().getId() + "->" + rel.getTarget().getId());
 			}
 			System.out.println();
-		}
+		}*/
 		
 		
 		graphDb.shutdown();

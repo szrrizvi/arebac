@@ -79,8 +79,8 @@ public class EvalTestRunner {
 				return;
 			}
 			for (GPHolder test : tests){
-				//executeSoloTest(test);
-				executeSoloTestFC(test);
+				executeSoloTest(test);
+				//executeSoloTestFC(test);
 			}
 		}
 	}
