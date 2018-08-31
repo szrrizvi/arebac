@@ -209,12 +209,14 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			List<MyNode> resultSchema = gph.getResultSchema();
 			Map<MyNode, N> result = new HashMap<MyNode, N>();
 
-
 			//Copy the nodes from the resultSchema to the result map
+			System.out.print("RESULT: [");
 			for (MyNode req : resultSchema){
 				N node = assignments.get(req);
 				result.put(req, node);
+				System.out.print("(" + req.getId() + ", " + node + "), ");
 			}
+			System.out.println("]");
 
 			//Add the result to the queryResults list. Avoid duplication
 			if (!queryResults.contains(result)){

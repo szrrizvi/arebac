@@ -146,7 +146,6 @@ public class EvalTestRunner {
 		
 		GPCheckerFCCBJ<Node, Entity> gpEval = new GPCheckerFCCBJ<Node, Entity>(test, ce, neighbourhoodAccess, variableOrdering, as);
 		
-		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
 		term.terminateAfter(6000l);

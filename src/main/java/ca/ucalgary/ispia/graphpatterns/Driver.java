@@ -78,9 +78,13 @@ public class Driver {
 		
 		 GPHolder test = tests.get(1);
 		 EvalTestRunner etr = new EvalTestRunner(graphDb);
-		 //etr.executeSoloTestFC(test);
+		 etr.executeSoloTestFC(test);
 		 System.out.println("DONE FC\n");
 		 etr.executeSoloTestFCCBJ(test);
+		 System.out.println("DONE FC-CBJ\n");
+		 etr.executeSoloTestFCLBJ(test);
+		 System.out.println("DONE FC-LBJ\n");
+		 
 		 
 		 
 		/*for (GPHolder test : tests){
