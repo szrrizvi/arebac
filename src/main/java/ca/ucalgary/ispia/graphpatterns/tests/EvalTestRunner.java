@@ -1,9 +1,7 @@
 package ca.ucalgary.ispia.graphpatterns.tests;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -32,6 +30,7 @@ import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
+import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.util.GPUtil;
 import ca.ucalgary.ispia.graphpatterns.util.SimpleCypherParser;
 import ca.ucalgary.ispia.graphpatterns.util.Translator;
@@ -78,9 +77,10 @@ public class EvalTestRunner {
 				e.printStackTrace();
 				return;
 			}
+			
 			for (GPHolder test : tests){
 				executeSoloTest(test);
-				//executeSoloTestFC(test);
+				executeSoloTestFC(test);
 			}
 		}
 	}
@@ -163,7 +163,10 @@ public class EvalTestRunner {
 		long time = end - start;
 		
 		//Print the performance time
-		System.out.println(time);
+		System.out.print(time + ", ");
+		if (result != null){
+			System.out.print(result.size() + ", ");
+		}
 	}
 	
 	public void executeSoloTestFC(GPHolder test){
@@ -183,7 +186,10 @@ public class EvalTestRunner {
 		long time = end - start;
 		
 		//Print the performance time
-		System.out.println(time);
+		System.out.print(time + ", ");
+		if (result != null){
+			System.out.println(result.size());
+		}
 	}
 	
 	/**

@@ -37,8 +37,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 	private final AltStart<N> altStart;
 
 	private int count;
-	private int jumpCount;
-	private int recCount;
 
 	private boolean killed;							//The kill flag.
 
@@ -64,8 +62,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.altStart = altStart;
 
 		count = 0;
-		jumpCount = 0;
-		recCount = 0;
 	}
 
 	/**
@@ -180,7 +176,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		for (Integer key : sizes.keySet()){
 			System.out.println(key + ", " + sizes.get(key));
 		}*/
-		System.out.print(recCount + ", " + jumpCount + ", ");
 
 		return queryResults;
 	}
@@ -226,6 +221,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				queryResults.add(result);
 			}
 			Set<MyNode> res = new HashSet<MyNode>();
+			res.addAll(resultSchema);
 			return res;
 		}
 
@@ -239,6 +235,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
 		}
 
+		
 		//Dead-end flag
 		boolean deadEnd = true;
 
@@ -250,7 +247,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
-
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
 
@@ -291,7 +287,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
 
-				recCount++;
 				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone);
 
 				if (killed){
@@ -307,21 +302,21 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 				if (!jumpNodes.isEmpty() && !jumpNodes.contains(nextNode)){
 					//If there is a future node assignment that leads to a deadend, such that the future node has no conflicts with nextNode,
 					//then no other candidate of nextNode can prevent the deadend. Therefore, we can just return using jumpNodes.
-					jumpCount++;
+					
 					return jumpNodes;
 				} else {
 					//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
 					//When we return from this call stack, we will return using jumpStack.
-					//System.out.println("PAUSED G");
+					
 					conflicts.addAll(jumpNodes);
 				}
-			}  // else NEED TO DO SOMETHING WITH CBJ HERE
+			}
 		}
 
 		if (deadEnd || bjFlag == count){
 			conflicts.addAll(deadEndJump(nextNode, confOut, confIn));
 			return conflicts;
-		} else {
+		} else {			
 			return new HashSet<MyNode>();
 		}
 	}

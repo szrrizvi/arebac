@@ -3,28 +3,17 @@ package ca.ucalgary.ispia.graphpatterns.gpchecker.opt;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
-
 import ca.ucalgary.ispia.graphpatterns.gpchecker.GPChecker;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.ConstraintsChecker;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
-import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.GraphPattern;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
 import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.tests.Killable;
-import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
 
 /**
  * This class provides the engine for checking if a given graph pattern
@@ -33,20 +22,21 @@ import ca.ucalgary.ispia.graphpatterns.util.LabelEnum;
  *
  */
 
-public class GPCheckerOpt implements GPChecker, Killable{
+public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 
-	private final GraphDatabaseService graphDb;			//The graph database interface
+	//private final GraphDatabaseService graphDb;			//The graph database interface
 	private int queryCount;							//The counter for transactions
 	private final GPHolder gph;							//The GPHolder
 	private final GraphPattern gp;						//The graph pattern contained in gph
-	public List<Map<MyNode, Node>> queryResults;	//The list of results that satisfy the query
+	public List<Map<MyNode, N>> queryResults;	//The list of results that satisfy the query
 
 	//The modularized components
-	private final ConstraintsEvaluator consEval;
-	private final NeighbourhoodAccess neighbourhoodAccess;
-	private final VariableOrdering variableOrdering;
-	private final AltStart altStart;
+	private final ConstraintsEvaluator<N, E> consEval;
+	private final NeighbourhoodAccess<N> neighbourhoodAccess;
+	private final VariableOrdering<N> variableOrdering;
+	private final AltStart<N> altStart;
 
+	private int count;
 
 	private boolean killed;							//The kill flag.
 
@@ -55,22 +45,23 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * @param graphDb The database to set
 	 * @param gph The graph pattern holder
 	 */
-	public GPCheckerOpt(GraphDatabaseService graphDb, GPHolder gph){
+	public GPCheckerFCLBJ(GPHolder gph, ConstraintsEvaluator<N, E> consEval, NeighbourhoodAccess<N> neighbourhoodAccess, VariableOrdering<N> variableOrdering, AltStart<N> altStart){
 		//Assign the fields
-		this.graphDb = graphDb;
+		//this.graphDb = graphDb;
 		this.gph = gph;
 		this.gp = gph.getGp();
 
 		//Initialize the results, the counter, and the kill flag
-		queryResults = new ArrayList<Map<MyNode, Node>>();
+		queryResults = new ArrayList<Map<MyNode, N>>();
 		queryCount = 0;
 		killed = false;
 
-		this.consEval = new ConstraintsChecker(gph, graphDb);
-		this.neighbourhoodAccess = new DBAccess (graphDb, consEval);
-		this.variableOrdering = new LeastCandidates(gp);
-		this.altStart = new AttrBasedStart(graphDb, consEval);
+		this.consEval = consEval;
+		this.neighbourhoodAccess = neighbourhoodAccess;
+		this.variableOrdering = variableOrdering;
+		this.altStart = altStart;
 
+		count = 0;
 	}
 
 	/**
@@ -88,10 +79,10 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * Runs the query evaluation algorithm.
 	 * @return The query result
 	 */
-	public List<Map<MyNode, Node>> check(){
+	public List<Map<MyNode, N>> check(){
 		//Initialize the assignments and candidates maps
-		Map<MyNode, Node> assignments = new HashMap<MyNode, Node>();
-		Map<MyNode, Set<Node>> candidates = new HashMap<MyNode, Set<Node>>();
+		Map<MyNode, N> assignments = new HashMap<MyNode, N>();
+		Map<MyNode, Set<N>> candidates = new HashMap<MyNode, Set<N>>();
 
 		//Delegate to the overloaded method
 		return check_init(assignments, candidates);
@@ -105,31 +96,24 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * for each key is the value of the "id" attribute
 	 * @return The query result
 	 */
-	public List<Map<MyNode, Node>> check(Map<MyNode, Integer> extraInfo){
+	public List<Map<MyNode, N>> check(Map<MyNode, Integer> extraInfo){
 		//Initialize the assignments and candidates maps
-		Map<MyNode, Node> assignments = new HashMap<MyNode, Node>();
-		Map<MyNode, Set<Node>> candidates = new HashMap<MyNode, Set<Node>>();
+		Map<MyNode, N> assignments = new HashMap<MyNode, N>();
+		Map<MyNode, Set<N>> candidates = new HashMap<MyNode, Set<N>>();
 
 		//For each node in the extraInfo map
 		for (MyNode node : extraInfo.keySet()){
-			try (Transaction tx = graphDb.beginTx()){
-				//Fix the MyNode object to the corresponding Node from the database
-				//based on the id property
-				Node vertex = graphDb.findNode(LabelEnum.PERSON, "id", extraInfo.get(node));
-				if (vertex == null){
-					//return null is no db node found with the given id
-					return null;
-				}
 
-				if (consEval.checkAttrs(node, vertex)){
-					//If the db node satisfies all attribute requirements, then add the mapping to the
-					//assignments map
-					assignments.put(node, vertex);
-				} else {
-					return null;
-				}
-				tx.success();
+			N vertex = neighbourhoodAccess.findNode(node, extraInfo.get(node));
+			if (vertex != null){
+				Set<N> temp = new HashSet<N>();
+				temp.add(vertex);
+				candidates.put(node, temp);
+			} else {
+				//System.out.println("HERE A");
+				return null;
 			}
+
 		}
 		//Continue on by delegating to the overloaded method
 		return check_init(assignments, candidates);
@@ -144,76 +128,55 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * @param assignments 
 	 * @return the query result
 	 */
-	private List<Map<MyNode, Node>> check_init(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates){
+	private List<Map<MyNode, N>> check_init(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates){
 
-		//Get the set of pre fixed nodes
-		Set<MyNode> alreadyFixed = assignments.keySet();
-
-		//Create the assignments for the remaining fixed nodes
+		//Create the candidates for the remaining fixed nodes
 		List<MyNode> nodes = gp.getNodes();
 		for (MyNode node : nodes){
 			//These nodes are not already fixed and have the id attribute
-			if (!alreadyFixed.contains(node) && node.hasAttribute("id")){
+			if (!candidates.keySet().contains(node) && node.hasAttribute("id")){
 
-				try (Transaction tx = graphDb.beginTx()){
-					//Obtain the db nodes with the matching id
-					Node vertex = graphDb.findNode(LabelEnum.PERSON, "id", Integer.parseInt(node.getAttribute("id")));
-					if (vertex == null){
-						//If the node is not found, return null
-						System.out.println("Not fixed: " + node.getAttribute("id"));
-						return null;
-					}
-
-					if (consEval.checkAttrs(node, vertex)){
-						//If all requirements pass, add the assignment
-						assignments.put(node, vertex);						
-					} else {
-						return null;
-					}
-
-					tx.success();
-				}
+				N vertex = neighbourhoodAccess.findNode(node);
+				if (vertex != null){
+					Set<N> temp = new HashSet<N>();
+					temp.add(vertex);
+					candidates.put(node, temp);
+				} else {
+					return null;
+				}				
 			}
-		}
-		//Check the direct relationships between the fixed nodes
-		if (!preCheck(assignments)){
-			//If the precheck fails, then return false.
-			return null;
 		}
 
 		//Initialize the conflit maps
 		Set<MyNode> confOut = new HashSet<MyNode>();
 		Map<MyNode, Set<MyNode>> confIn = new HashMap<MyNode, Set<MyNode>>();
 
-		//Populate and filter the immediate neighbours of the fixed nodes
-		for (MyNode key : assignments.keySet()){
-			if (!populateFilter(assignments, candidates, key, confOut, confIn)){
-				return null;
-			}
-		}
-
 		//If the canadidates map is still empty, because there we no fixed nodes, then
 		//populate the candidates map based on the attributes.
 		if (candidates.isEmpty()){
 			if (!altStart.startPop(gp.getNodes(), candidates)){
 				return null;
-			}/* else {
-				for (MyNode key : assignments.keySet()){
-					candidates.remove(key);
-				}
-			}*/
+			}
 		}
-		
-			
 
-		//If the candidates map is still empty, even after populating it through attribute
-		//requirements, then return null as we have no starting point.
+		//If the candidates map is still empty, even after populating it through
+		//alternat start, then return null as we have no starting point.
 		if (candidates.isEmpty()){
 			return null;
 		}
 
 		//Start the search for the remaining nodes
 		check_rec(assignments, candidates, confIn);
+
+		
+		/*DBAccess temp = (DBAccess) neighbourhoodAccess;
+		Map<Integer, Integer> sizes = temp.neighbourhoodSizes;
+
+		System.out.println("DB Queries:");
+		for (Integer key : sizes.keySet()){
+			System.out.println(key + ", " + sizes.get(key));
+		}*/
+
 		return queryResults;
 	}
 
@@ -225,13 +188,11 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * The recursive step of the GP-Eval algorithm.
 	 * @param assignments The current state of assignments.
 	 * @param candidates The current state of candidates.
-	 * @param confOut Outgoing conflicts. Var v filters/populates the associated list.
 	 * @param confIn Incoming conflicts. Var v is filtered/populated by the associated list. 
 	 * @return
 	 */
 
-	private Set<MyNode> check_rec(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, Map<MyNode, Set<MyNode>> confIn){
-
+	private Set<MyNode> check_rec(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, Map<MyNode, Set<MyNode>> confIn){
 		//If the search has been killed, return false
 		if (killed){
 			return null;
@@ -242,14 +203,16 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
 
+			count++;
+
 			//Add the assignments for the queryResults list
 			List<MyNode> resultSchema = gph.getResultSchema();
-			Map<MyNode, Node> result = new HashMap<MyNode, Node>();
+			Map<MyNode, N> result = new HashMap<MyNode, N>();
 
 
 			//Copy the nodes from the resultSchema to the result map
 			for (MyNode req : resultSchema){
-				Node node = assignments.get(req);
+				N node = assignments.get(req);
 				result.put(req, node);
 			}
 
@@ -257,52 +220,47 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			if (!queryResults.contains(result)){
 				queryResults.add(result);
 			}
-			return new HashSet<MyNode>(gph.getResultSchema());
+			Set<MyNode> res = new HashSet<MyNode>();
+			res.addAll(resultSchema);
+			return res;
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
 
+		int bjFlag = count;
+
 		//Pick the next node to assign such that it is populated but not yet assigned 
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
-		consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
+		if (consEval != null){
+			consEval.mexFilter(nextNode, candidates.get(nextNode), assignments, confIn);
+		}
 
-		//Dead-ednd flag
-		boolean deadEnd = true;
 		
+		//Dead-end flag
+		boolean deadEnd = true;
+
 		//Set for outgoing conflicts.
 		Set<MyNode> confOut = new HashSet<MyNode>();
-		Set<MyNode> jumpStack = new HashSet<MyNode>();
-		
-		/*System.out.println("CANDIDATES");
-		for (MyNode key : candidates.keySet()){
-			System.out.print(key.getId() + ": ");
-			for (Node n : candidates.get(key)){
-				System.out.print(n.getId() + ", ");
-			}
-			System.out.println();
-		}*/
+		Set<MyNode> conflicts = new HashSet<MyNode>();
 
 		//Choose a vertex for nextNode.
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
-		for(Node vertex : candidates.get(nextNode)){
-			
+		for(N vertex : candidates.get(nextNode)){
 			//Clone the candidates and assignments map
-			Map<MyNode, Set<Node>> candsClone = new HashMap<MyNode, Set<Node>>();
+			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
+
 			for (MyNode key : candidates.keySet()){
 				//Get the set of candidates
-				Set<Node> candidatesSet = new HashSet<Node>(); 
-
-				for (Node candidate : candidates.get(key)){
-					candidatesSet.add(candidate);
-				}
+				Set<N> candidatesSet = new HashSet<N>(); 
+				candidatesSet.addAll(candidates.get(key));
 				candsClone.put(key, candidatesSet);
 			}
 
-			Map<MyNode, Node> assnClone = new HashMap<MyNode, Node>();
+			Map<MyNode, N> assnClone = new HashMap<MyNode, N>();
 			for (MyNode key : assignments.keySet()){
 				//Get the assigned vertex
-				Node assn = assignments.get(key);
+				N assn = assignments.get(key);
 				assnClone.put(key, assn);
 			}
 			//Update the clones based on current assignment
@@ -313,53 +271,55 @@ public class GPCheckerOpt implements GPChecker, Killable{
 
 			Map<MyNode, Set<MyNode>> confInClone = new HashMap<MyNode, Set<MyNode>>();
 			for (MyNode key : confIn.keySet()){
-				//Get the set of out conflicts
+				//Get the set of in conflicts
 				Set<MyNode> confSet = new HashSet<MyNode>();
-
-				for (MyNode conflict : confIn.get(key)){
-					confSet.add(conflict);
-				}
+				confSet.addAll(confIn.get(key));
 				confInClone.put(key, confSet);
 			}
 
 			//Perform forward checking
 			boolean validVertex = populateFilter(assnClone, candsClone, nextNode, confOut, confInClone);
-			
+
 			if (validVertex){
 				//Update deadEnd flag
 				deadEnd = false;
 
 				//If we didn't abandon this vertex, then we can recurse
 				//Recurse with clones of maps
+
 				Set<MyNode> jumpNodes = check_rec(assnClone, candsClone, confInClone);
 
 				if (killed){
 					return null;
 				}
 
-				if (jumpNodes != null && !jumpNodes.isEmpty()){
-					
-					if (!jumpNodes.contains(nextNode)){
-						return jumpNodes;
-					} else {
-						jumpStack.addAll(jumpNodes);
-					}
+				if (jumpNodes == null){
+					System.out.println("Unexpected Return value: NULL");
+					killed = true;
+					return null;
 				}
 
-				//if (rs != null && 
-				//		rs.isJumpingForJoy() && 
-				//		!rs.getJumpVariables().contains(nextNode)){
-				//	return rs;
-				//}
+				if (!jumpNodes.isEmpty() && !jumpNodes.contains(nextNode)){
+					//If there is a future node assignment that leads to a deadend, such that the future node has no conflicts with nextNode,
+					//then no other candidate of nextNode can prevent the deadend. Therefore, we can just return using jumpNodes.
+					
+					return jumpNodes;
+				} else {
+					//If the future deadend is affected by NextNode, then we add the jumpNodes to jumpStack, and try the next candidate for nextNode.
+					//When we return from this call stack, we will return using jumpStack.
+					
+					conflicts.addAll(jumpNodes);
+				}
 			}
 		}
 
-		if (deadEnd){
-			return deadEndJump(nextNode, confOut, confIn);
+		if (deadEnd || bjFlag == count){
+			return new HashSet<MyNode>();
 		} else {
-			jumpStack.addAll(successJump(nextNode, confOut, confIn, assignments.keySet()));
+			Set<MyNode> liveEnd = liveEndJump(nextNode, confOut, confIn, assignments.keySet());
+			liveEnd.addAll(conflicts);
 			
-			return jumpStack;
+			return liveEnd;
 		}
 	}
 
@@ -376,9 +336,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * @param confIn
 	 * @return
 	 */
-	private boolean populateFilter(Map<MyNode, Node> assignments, Map<MyNode, Set<Node>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
+	private boolean populateFilter(Map<MyNode, N> assignments, Map<MyNode, Set<N>> candidates, MyNode node, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn){
 
-		Node vertex = assignments.get(node);
+		N vertex = assignments.get(node);
 		//Get all of the relationships from GP that contain the given node.
 		List<MyRelationship> rels = gp.getAllRelationships(node);
 
@@ -389,11 +349,11 @@ public class GPCheckerOpt implements GPChecker, Killable{
 
 			//If the other node is not already been assigned, then populate/filter it
 			if (!assignments.containsKey(otherNode)){
-				Set<Node> neighbours = neighbourhoodAccess.findNeighbours(rel, node, vertex);
+				Set<N> neighbours = neighbourhoodAccess.findNeighbours(rel, node, vertex);
 
 				if (candidates.containsKey(otherNode)){
 					//If the candidates set exists, then filter it
-					Set<Node> temp = candidates.get(otherNode);
+					Set<N> temp = candidates.get(otherNode);
 
 					//If there is filtering, then add the incoming conflict.
 					if (!neighbours.containsAll(temp)){
@@ -403,7 +363,9 @@ public class GPCheckerOpt implements GPChecker, Killable{
 					temp.retainAll(neighbours);				
 				} else {
 					//Else populate it
-					candidates.put(otherNode, neighbours);
+					Set<N> temp = new HashSet<N>();
+					temp.addAll(neighbours);
+					candidates.put(otherNode, temp);
 
 					//If there is populating, then add the incoming conflict.
 					addConflictIn(node, otherNode, confIn);
@@ -413,7 +375,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 				if (candidates.get(otherNode).isEmpty()){
 
 					confOut.add(otherNode);
-
+					//System.out.println("FAILED: " + node.getId() + ", " + assignments.get(node));
 					return false;
 				}
 			}
@@ -427,57 +389,6 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	// HELPER METHODS
 	//--------------------------//	
 
-	/**
-	 * This method checks the direct relationships between the fixed nodes.
-	 * @param gp
-	 * @param fixedNodes
-	 * @return
-	 */
-	private boolean preCheck(Map<MyNode, Node> fixedNodes){//, Set<MyNode> visitedNodes){
-
-		//Get all of the relationships from GP.
-		List<MyRelationship> rels = gp.getAllRelationships();
-
-		//Iterate through the relationships
-		for (MyRelationship rel : rels){
-			//Find the relationships that contain the fixed nodes
-			if (fixedNodes.containsKey(rel.getSource()) && fixedNodes.containsKey(rel.getTarget())){
-
-
-				//Get the nodes
-				Node source = fixedNodes.get(rel.getSource());
-				Node target = fixedNodes.get(rel.getTarget());
-
-				boolean passed = false;	//Flag for checking if relationship passed
-
-				//Check if the relationship exists between them.
-				try (Transaction tx = graphDb.beginTx()){
-					queryCount++;
-					Iterator<Relationship> relIte = source.getRelationships(rel.getIdentifier(), Direction.OUTGOING).iterator();
-
-					while (relIte.hasNext() && !passed){
-						Relationship r = relIte.next();
-						Node neighbour = r.getEndNode();
-
-						if (neighbour.equals(target)){
-							passed = true;
-						}
-					}
-
-					tx.success();
-				}
-
-				//If the relationship did not pass, then return false
-				if (!passed){
-					return false;
-				}
-			}
-		}
-
-		//If reached here, the all of the relationships passed, thus return true.
-		return true;
-	}
-
 	//-------------------------//
 	// KILLABLE FEATURES	
 	//-------------------------//
@@ -486,6 +397,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 */
 	public void kill(){
 		this.killed = true;
+		System.out.print("KILLED ");
 	}
 
 
@@ -549,7 +461,7 @@ public class GPCheckerOpt implements GPChecker, Killable{
 		return jumpVars;
 
 	}
-
+	
 	/**
 	 * Computes the set of nodes to jump back to in case the current node has at least one assignment that can be extended. 
 	 * @param src The current node.
@@ -558,9 +470,10 @@ public class GPCheckerOpt implements GPChecker, Killable{
 	 * @param assignedNodes The current assignments map.
 	 * @return The set of nodes to jump back to.
 	 */
-	private Set<MyNode> successJump(MyNode src, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn, Set<MyNode> assignedNodes){
+	private Set<MyNode> liveEndJump(MyNode src, Set<MyNode> confOut, Map<MyNode, Set<MyNode>> confIn, Set<MyNode> assignedNodes){
 		Set<MyNode> jumpVars = new HashSet<MyNode>();
-
+		jumpVars.addAll(gph.getResultSchema());
+		
 		//Get the filtering chains for the future Result Schema nodes
 		for (MyNode node : gph.getResultSchema()){
 			if (!assignedNodes.contains(node)){
@@ -570,8 +483,6 @@ public class GPCheckerOpt implements GPChecker, Killable{
 			}
 		}
 		
-		//If there was at least one candidate for the current variable that caused a deadend, then get the corresponding 
-		//back jump variables for that candidate as well.
 		if (!confOut.isEmpty()){
 			jumpVars.addAll(deadEndJump(src, confOut, confIn));
 		}

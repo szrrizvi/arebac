@@ -339,14 +339,34 @@ public class SubgraphGenerator {
 				}
 			}
 		}
-		System.out.println("PhaseTwoB");
-		for (Relationship rel : tempRels){
-			try (Transaction tx = graphDb.beginTx()){
-				System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
-				tx.success();
+		
+		List<Relationship> relsClone = new ArrayList<Relationship>();
+		relsClone.addAll(rels);
+		boolean contains = true;
+		try (Transaction tx = graphDb.beginTx()){
+			for (int i = 0; i < relsClone.size(); i++){
+				if (!tempRels.contains(relsClone.get(i))){
+					contains = false;
+				}
 			}
+			
+			if (contains && relsClone.size() == tempRels.size()){
+				System.out.println("The Same");
+			} else {
+				System.out.println("Different:\nOriginal");
+				
+				for (Relationship rel : relsClone){
+					System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
+				}
+				
+				System.out.println("\nModified");
+				for (Relationship rel : tempRels){
+					System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
+				}
+			}
+			
+			tx.success();
 		}
-		System.out.println();
 	}
 
 
@@ -390,16 +410,6 @@ public class SubgraphGenerator {
 				tx.success();
 			}
 		}
-
-		System.out.println("PhaseTwo");
-		for (Relationship rel : rels){
-			try (Transaction tx = graphDb.beginTx()){
-				System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
-				tx.success();
-			}
-		}
-		System.out.println();
-
 		return;
 	}
 
