@@ -220,9 +220,8 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			if (!queryResults.contains(result)){
 				queryResults.add(result);
 			}
-			Set<MyNode> res = new HashSet<MyNode>();
-			res.addAll(resultSchema);
-			return res;
+
+			return new HashSet<MyNode>();
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
@@ -247,6 +246,14 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
+			
+			System.out.print("Assignment: [");
+			for (MyNode key : assignments.keySet()){
+				System.out.print("("+key.getId() + ", " + assignments.get(key) + "), "); 
+			}
+			System.out.println("]<- [(" + nextNode.getId() + ", " + vertex + ")]");
+
+			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
 

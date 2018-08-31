@@ -126,6 +126,14 @@ public class EvalTestRunner {
 		System.out.print(time + ", ");
 		if (result != null){
 			System.out.print(result.size() + ", ");
+			
+			for (Map<MyNode, Node> res : result){
+				System.out.print("Result [");
+				for (MyNode key : res.keySet()){
+					System.out.print("(" + key.getId() + ", " + res.get(key).getId() + "), ");
+				}
+				System.out.println("]");
+			}
 		}
 	}
 	
@@ -179,6 +187,14 @@ public class EvalTestRunner {
 		System.out.print(time + ", ");
 		if (result != null){
 			System.out.println(result.size());
+			
+			for (Map<MyNode, Node> res : result){
+				System.out.print("Result [");
+				for (MyNode key : res.keySet()){
+					System.out.print("(" + key.getId() + ", " + res.get(key).getId() + "), ");
+				}
+				System.out.println("]");
+			}
 		}
 	}
 	

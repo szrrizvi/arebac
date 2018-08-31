@@ -36,8 +36,6 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 	private final VariableOrdering<N> variableOrdering;
 	private final AltStart<N> altStart;
 
-	private int count;
-
 	private boolean killed;							//The kill flag.
 
 	/**
@@ -61,7 +59,6 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.variableOrdering = variableOrdering;
 		this.altStart = altStart;
 
-		count = 0;
 	}
 
 	/**
@@ -203,18 +200,19 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
 
-			count++;
-
 			//Add the assignments for the queryResults list
 			List<MyNode> resultSchema = gph.getResultSchema();
 			Map<MyNode, N> result = new HashMap<MyNode, N>();
 
 
 			//Copy the nodes from the resultSchema to the result map
+			System.out.print("RESULT: [");
 			for (MyNode req : resultSchema){
 				N node = assignments.get(req);
 				result.put(req, node);
+				System.out.print("(" + req.getId() + ", " + node + "), ");
 			}
+			System.out.println("]");
 
 			//Add the result to the queryResults list. Avoid duplication
 			if (!queryResults.contains(result)){
@@ -226,8 +224,6 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		}
 
 		// SMALLER PROBLEM AND RECURSIVE STEP
-
-		int bjFlag = count;
 
 		//Pick the next node to assign such that it is populated but not yet assigned 
 		MyNode nextNode = variableOrdering.pickNextNode(assignments, candidates);
@@ -247,6 +243,11 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
+			System.out.print("Assignment: [");
+			for (MyNode key : assignments.keySet()){
+				System.out.print("("+key.getId() + ", " + assignments.get(key) + "), "); 
+			}
+			System.out.println("]<- [(" + nextNode.getId() + ", " + vertex + ")]");
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
 
@@ -313,8 +314,9 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 			}
 		}
 
-		if (deadEnd || bjFlag == count){
-			return new HashSet<MyNode>();
+		if (deadEnd){
+			conflicts.addAll(deadEndJump(nextNode, confOut, confIn));
+			return conflicts;//new HashSet<MyNode>();
 		} else {
 			Set<MyNode> liveEnd = liveEndJump(nextNode, confOut, confIn, assignments.keySet());
 			liveEnd.addAll(conflicts);
