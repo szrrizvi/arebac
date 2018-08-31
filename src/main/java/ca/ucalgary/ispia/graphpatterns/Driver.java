@@ -17,13 +17,13 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args){	
-
+		
 		Driver d = new Driver();
 		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
-		/*
-		Random rand = new Random(5523397);
-		//int[] sizes = {5, 7, 10, 9, 11, 13};
-		int[] sizes = {13};
+		
+		
+		/*Random rand = new Random(5523397);
+		int[] sizes = {5, 7, 10, 9, 11, 13};
 		int[] attrs = {1, 2, 4};
 		int[] mex = {0, 1, 2};
 		int count = 1;
@@ -43,16 +43,16 @@ public class Driver {
 				}
 			}
 			
-			/*try {
-				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("testCaseB-"+count+".ser"));
+			try {
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("testCase-"+count+".ser"));
 				count++;
 				oos.writeObject(tests);
 				oos.close();
 			} catch (Exception e){
 				e.printStackTrace();
 				return;
-			}*/
-		//}
+			}
+		}*/
 		
 		
 		EvalTestRunner etr = new EvalTestRunner(graphDb);
@@ -61,9 +61,9 @@ public class Driver {
 		etr.runGPHTestsList("testCase", 6);
 		
 		
-		 /*List<GPHolder> tests = null;
+		/*List<GPHolder> tests = null;
 		 try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("testCaseB-6.ser"));
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("testCase-6.ser"));
 			tests = (List<GPHolder>) ois.readObject();
 			ois.close();
 		} catch (Exception e) {

@@ -14,14 +14,13 @@ import java.util.concurrent.Executors;
 import org.neo4j.graphdb.Entity;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.TransactionTerminatedException;
 
 import ca.ucalgary.ispia.graphpatterns.gpchecker.GPCheckerFC;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.AltStart;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.ConstraintsEvaluator;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerFCCBJ;
+import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.GPCheckerFCLBJ;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.NeighbourhoodAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.VariableOrdering;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.AttrBasedStart;
@@ -30,10 +29,8 @@ import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.DBAccess;
 import ca.ucalgary.ispia.graphpatterns.gpchecker.opt.impl.LeastCandidates;
 import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.graph.MyNode;
-import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 import ca.ucalgary.ispia.graphpatterns.util.GPUtil;
 import ca.ucalgary.ispia.graphpatterns.util.SimpleCypherParser;
-import ca.ucalgary.ispia.graphpatterns.util.Translator;
 
 /**
  * This class runs the evaluation tests. 
@@ -77,9 +74,10 @@ public class EvalTestRunner {
 				e.printStackTrace();
 				return;
 			}
-			
+
 			for (GPHolder test : tests){
-				executeSoloTest(test);
+				executeSoloTestFCLBJ(test);
+				//executeSoloTestFCCBJ(test);
 				executeSoloTestFC(test);
 			}
 		}
@@ -96,50 +94,42 @@ public class EvalTestRunner {
 			List<GPHolder> gphList = scp.parse();
 
 			for (GPHolder test : gphList){
-				executeSoloTest(test);
+				executeSoloTestFCCBJ(test);
 			}
 		}
 	}
 
-	/**
-	 * Reads the test from the files, and executes them.
-	 * Each file consists a list of serialized TripleGPHolder objects.  
-	 * Assumed: At least one of the flags is true.
-	 * @param numFiles The number of test files in the folder.
-	 * @param folder The name of the folder containing test files.
-	 * @param twoStep Flag. If true, run the twoStep algorithm, else don't run it.
-	 * @param comb Flag. If true, run the combined algorithm, else don't run it.
-	 * @throws Exception
-	 */
-	public void runTests(int numFiles, String folder, boolean twoStep, boolean comb) throws Exception{
+	public void executeSoloTestFCLBJ(GPHolder test){
+		
+		ConstraintsEvaluator<Node,Entity> ce = new ConstraintsChecker(test, graphDb);
+		NeighbourhoodAccess<Node> neighbourhoodAccess = new DBAccess(graphDb, ce);
+		VariableOrdering<Node> variableOrdering = new LeastCandidates<Node>(test.getGp());
+		AltStart<Node> as = new AttrBasedStart(graphDb, ce);
+		
+		GPCheckerFCLBJ<Node, Entity> gpEval = new GPCheckerFCLBJ<Node, Entity>(test, ce, neighbourhoodAccess, variableOrdering, as);
+		
+		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
+		//Set a 6 second kill switch
+		Terminator term = new Terminator(gpEval);
+		term.terminateAfter(6000l);
+		//Run the algorithm and record the time
+		long start = System.nanoTime();
+		List<Map<MyNode, Node>> result = gpEval.check();
+		long end = System.nanoTime();
+		//Make sure the terminator is killed
+		term.nullifyObj();
+		term.stop();
 
-		for (int i = 0; i < numFiles; i++){
-			//Read the test cases from the file
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(folder+"/tests"+i+".ser"));
-			List<TripleGPHolder> tests = (List<TripleGPHolder>) ois.readObject();
-			ois.close();
-			//Execute the tests
-			executeTests(tests, twoStep, comb);
+		long time = end - start;
+		
+		//Print the performance time
+		System.out.print(time + ", ");
+		if (result != null){
+			System.out.print(result.size() + ", ");
 		}
 	}
 	
-	
-
-	/**
-	 * Executes the given test. The flags specify which algorithm(s) to run.
-	 * Assumed: At least one of the flags is true.
-	 * @param test The target test.
-	 * @param twoStep Flag. If true, run the twoStep algorithm, else don't run it.
-	 * @param comb Flag. If true, run the combined algorithm, else don't run it.
-	 */
-	public void executeTests(TripleGPHolder test, boolean twoStep, boolean comb){
-		//Add the test to a list, and invoke the overloading method.
-		List<TripleGPHolder> tests = new ArrayList<TripleGPHolder>();
-		tests.add(test);
-		executeTests(tests, twoStep, comb);
-	}
-
-	public void executeSoloTest(GPHolder test){
+	public void executeSoloTestFCCBJ(GPHolder test){
 		
 		ConstraintsEvaluator<Node,Entity> ce = new ConstraintsChecker(test, graphDb);
 		NeighbourhoodAccess<Node> neighbourhoodAccess = new DBAccess(graphDb, ce);
@@ -192,155 +182,6 @@ public class EvalTestRunner {
 		}
 	}
 	
-	/**
-	 * Executes the given list of tests. The flags specify which algorithm(s) to run.
-	 * Assumed: At least one of the flags is true.
-	 * @param tests The tests to execute.
-	 * @param twoStep Flag. If true, run the twoStep algorithm, else don't run it.
-	 * @param comb Flag. If true, run the combined algorithm, else don't run it.
-	 */
-	public void executeTests(List<TripleGPHolder> tests, boolean twoStep, boolean comb){
-		for (TripleGPHolder test : tests){	//Iterate through the tests
-
-			//Initialize the variables
-			GPHolder dbQuery = test.dbQeury;
-			GPHolder policy = test.policy;
-			GPHolder combined = test.combined;
-
-			Terminator term;
-			long start, end, time, startB, endB, timeB;
-			time = 0l;
-			timeB = 0l;
-
-			//Run the twoStep algorithm if specified
-			if (twoStep){
-				TwoStepEval tse = new TwoStepEval();
-
-				//Set a 6 second kill switch
-				term = new Terminator(tse);
-				term.terminateAfter(6000l);
-				//Run the algorithm and record the time.
-				start = System.nanoTime();
-				List<Map<MyNode, Node>> filtered = tse.check(graphDb, dbQuery, policy);
-				end = System.nanoTime();
-
-				//Make sure the terminator is killed
-				term.nullifyObj();
-				term.stop();
-
-				time = end - start;
-				//Print the performance time
-				if (tse.unfiltered != null){
-					System.out.print("Unfiltered size=" + tse.unfiltered.size() + ", ");
-				}
-				System.out.print("twoStep time=" + time + ", ");
-
-			}
-
-
-			//Run the combined algorithm if specified
-			if (comb){
-				GPCheckerFC gpFC = new GPCheckerFC(graphDb, combined);
-				//Set a 6 second kill switch
-				term = new Terminator(gpFC);
-				term.terminateAfter(6000l);
-				//Run the algorithm and record the time
-				startB = System.nanoTime();
-				List<Map<MyNode, Node>> result = gpFC.check();
-				endB = System.nanoTime();
-				//Make sure the terminator is killed
-				term.nullifyObj();
-				term.stop();
-
-				timeB = endB - startB;
-				//Print the performance time
-
-				if (result != null){
-					System.out.print("Result size=" + result.size() + ", ");
-				}
-
-				System.out.print("Combined time=" + timeB + ", ");
-			}
-
-			//If both types of algorithms were ran, compare the performances.
-			if (twoStep && comb){
-				//Flags to specify if the algorithms completed (under 6 seconds). 
-				boolean tsFail = false;
-				boolean combFail = false;
-
-				if (time >= 6000000000l){
-					tsFail= true;	
-				}
-				if (timeB >= 6000000000l){
-					combFail = true;
-				}
-
-
-				if (!tsFail && !combFail){	//If both algorithms completed
-					if (time > timeB){
-						System.out.print("Case=0, ");	//TwoStep performed slower than combined
-					} else {
-						System.out.print("Case=1, ");	//TwoStep performed faster than combined
-					}
-				} else if(tsFail && !combFail) {
-					System.out.print("Case=2, ");		//TwoStep didn't complete, but combined completed.
-				} else if (!tsFail && combFail) {
-					System.out.print("Case=3, ");		//TwoStep completed, but combined didn't.
-				} else {
-					System.out.print("Case=4, ");		//Neither of the algorithms completed.
-				}
-			} else {
-				System.out.println();
-			}
-
-			runCypherQuery(Translator.translateToCypher(combined));
-		}
-	}
-
-	private void runCypherQuery(String query){
-
-		TerminatorCypher term = null;
-		try (Transaction tx = graphDb.beginTx()){
-
-			long start = 0l, end = 0l;
-
-			term = new TerminatorCypher(tx);
-			term.terminateAfter(6000l);
-
-			start = System.nanoTime();
-			Result result = graphDb.execute(query);
-
-			boolean done = false;
-			int count = 0;
-			while(result.hasNext() && !done){
-				Map<String, Object> res = result.next();
-
-				for (String key : res.keySet()){
-					res.get(key);
-				}
-				count++;
-
-				long currTime = System.nanoTime();
-				if ((currTime - start) > 6000000000l){
-					done = true;
-				}
-			}
-			end = System.nanoTime();
-
-			term.nullifyTx();
-			term.stop();
-			result.close();
-
-			long timeC = end - start;
-			System.out.println("Cypher Time=" + timeC +", CypherResult=" + count);
-			//System.out.println(count);
-
-			tx.success();
-		} catch (TransactionTerminatedException e){
-			term.stop();
-			System.out.println("Transaction lasted more than 6 seconds");
-		}
-	}
 
 	///////////////////////////////////////////////////////
 	//													 //
@@ -391,8 +232,7 @@ public class EvalTestRunner {
 			}
 
 			//Run the test case
-			executeSoloTest(test.combined);
-			//executeTests(test, true, true);
+			executeSoloTestFCCBJ(test.combined);
 		}
 	}
 	

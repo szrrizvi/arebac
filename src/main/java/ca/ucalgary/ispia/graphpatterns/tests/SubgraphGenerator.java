@@ -3,11 +3,9 @@ package ca.ucalgary.ispia.graphpatterns.tests;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Entity;
@@ -124,7 +122,6 @@ public class SubgraphGenerator {
 		//For all pairs of nodes in allNodes, if a relationship exists between them
 		//in the database, then ensure that relationship also exists in rels.
 		phaseTwo();
-		phaseTwoB();
 
 		//Make sure that gp passes the minimum number of relationships requirement. 
 		int minRels = (int)Math.floor((allNodes.size()-1)*complete);
@@ -316,68 +313,15 @@ public class SubgraphGenerator {
 		return;
 	}
 
-	private void phaseTwoB(){
-
-		List<Relationship> tempRels = new ArrayList<Relationship>();
-
-		for (Node n1 : allNodes){
-			for (Node n2 : allNodes){
-				if (!n1.equals(n2)){
-					try (Transaction tx = graphDb.beginTx()){
-						Iterable<Relationship> ite = n1.getRelationships(Direction.OUTGOING);
-
-						for (Relationship rel : ite){
-							Node tgt = rel.getEndNode();
-
-							if (tgt.equals(n2)){
-								tempRels.add(rel);
-							}
-						}
-
-						tx.success();
-					}
-				}
-			}
-		}
-		
-		List<Relationship> relsClone = new ArrayList<Relationship>();
-		relsClone.addAll(rels);
-		boolean contains = true;
-		try (Transaction tx = graphDb.beginTx()){
-			for (int i = 0; i < relsClone.size(); i++){
-				if (!tempRels.contains(relsClone.get(i))){
-					contains = false;
-				}
-			}
-			
-			if (contains && relsClone.size() == tempRels.size()){
-				System.out.println("The Same");
-			} else {
-				System.out.println("Different:\nOriginal");
-				
-				for (Relationship rel : relsClone){
-					System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
-				}
-				
-				System.out.println("\nModified");
-				for (Relationship rel : tempRels){
-					System.out.println(rel.getStartNodeId() + "->" + rel.getEndNodeId());
-				}
-			}
-			
-			tx.success();
-		}
-	}
-
-
 	/**
 	 * Finds all relationships in the database, between the nodes in allNodes, then adds them to
 	 * the list rels.
 	 */
 	private void phaseTwo(){
 
+		Collections.shuffle(allNodes, random);
 		List<Pair<Node, Node>> pairs = new ArrayList<Pair<Node, Node>>();
-
+		
 		//For each node in allNode, get all relationshpis and iterate through each relationship.
 		for (Node n1 : allNodes){
 
@@ -388,22 +332,16 @@ public class SubgraphGenerator {
 
 				for (Relationship rel : ite){
 					Node n2 = rel.getOtherNode(n1);	//Get the other node
-
 					if (allNodes.contains(n2) && !n1.equals(n2)){					//If n2 is part of allNodes and n1 != n2
 						if (!rels.contains(rel)){									//If the relationship is not already part of rels
-							//Pair<Node, Node> forwardPair = new Pair<Node, Node>(n1, n2);
-							//Pair<Node, Node> backwardPair = new Pair<Node, Node>(n2, n1);
-							//if (!pairs.contains(forwardPair) && !pairs.contains(backwardPair)){
-							rels.add(rel);											//Add the relationship to the lists.
-							//pairs.add(forwardPair);
-							//pairs.add(backwardPair);
-							//} else {
-							/*if(random.nextBoolean()){
-									rels.add(rel);
-									pairs.add(forwardPair);
-									pairs.add(backwardPair);
-								}*/
-							//}
+							Pair<Node, Node> pA = new Pair<Node, Node>(n1, n2);
+							Pair<Node, Node> pB = new Pair<Node, Node>(n2, n1);
+
+							if (!pairs.contains(pA)){
+								rels.add(rel);											//Add the relationship to the lists.
+								pairs.add(pA);
+								pairs.add(pB);
+							}
 						}
 					}
 				}
