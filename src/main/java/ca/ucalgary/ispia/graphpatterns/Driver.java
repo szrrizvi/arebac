@@ -59,13 +59,13 @@ public class Driver {
 		}*/
 		
 		
-		//EvalTestRunner etr = new EvalTestRunner(graphDb);
-		//etr.warmup(250);
-		//System.out.println("Done Warmup\n");
-		//etr.runGPHTestsList("testCase", 6);
+		EvalTestRunner etr = new EvalTestRunner(graphDb);
+		etr.warmup(250);
+		System.out.println("Done Warmup\n"); 
+		etr.runGPHTestsList("performance-tests/testCase", 6);
 		
 		
-		List<GPHolder> tests = null;
+		/*List<GPHolder> tests = null;
 		 try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("performance-tests/testCase-3.ser"));
 			tests = (List<GPHolder>) ois.readObject();
@@ -87,7 +87,7 @@ public class Driver {
 		 
 		 
 		 
-		/*for (GPHolder test : tests){
+		for (GPHolder test : tests){
 			List<MyRelationship> rels = test.getGp().getAllRelationships();
 			for (MyRelationship rel : rels){
 				System.out.println(rel.getSource().getId() + "->" + rel.getTarget().getId());

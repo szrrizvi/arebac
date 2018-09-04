@@ -54,7 +54,7 @@ public class EvalTestRunner {
 	//	Methods for running test cases					 //
 	//													 //
 	///////////////////////////////////////////////////////
-	
+
 	/**
 	 * Runs the GPH Test cases.
 	 * Precondition: Each file contains a list of GPHolder objects.
@@ -78,11 +78,11 @@ public class EvalTestRunner {
 			for (GPHolder test : tests){
 				executeSoloTestFCLBJ(test);
 				//executeSoloTestFCCBJ(test);
-				executeSoloTestFC(test);
+				//executeSoloTestFC(test);
 			}
 		}
 	}
-	
+
 	/**
 	 * Runs the test cases provided in text based format
 	 * @param fileNamePrefix The name of the file: fileNamePrefix + "-" + i + ".ser"
@@ -100,14 +100,14 @@ public class EvalTestRunner {
 	}
 
 	public void executeSoloTestFCLBJ(GPHolder test){
-		
+
 		ConstraintsEvaluator<Node,Entity> ce = new ConstraintsChecker(test, graphDb);
 		NeighbourhoodAccess<Node> neighbourhoodAccess = new DBAccess(graphDb, ce);
 		VariableOrdering<Node> variableOrdering = new LeastCandidates<Node>(test.getGp());
 		AltStart<Node> as = new AttrBasedStart(graphDb, ce);
-		
+
 		GPCheckerFCLBJ<Node, Entity> gpEval = new GPCheckerFCLBJ<Node, Entity>(test, ce, neighbourhoodAccess, variableOrdering, as);
-		
+
 		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
@@ -121,12 +121,12 @@ public class EvalTestRunner {
 		term.stop();
 
 		long time = end - start;
-		
+
 		//Print the performance time
-		System.out.print(time + ", ");
-		if (result != null){
+		System.out.println(time);
+		/*if (result != null){
 			System.out.print(result.size() + ", ");
-			
+
 			for (Map<MyNode, Node> res : result){
 				System.out.print("Result [");
 				for (MyNode key : res.keySet()){
@@ -134,18 +134,18 @@ public class EvalTestRunner {
 				}
 				System.out.println("]");
 			}
-		}
+		}*/
 	}
-	
+
 	public void executeSoloTestFCCBJ(GPHolder test){
-		
+
 		ConstraintsEvaluator<Node,Entity> ce = new ConstraintsChecker(test, graphDb);
 		NeighbourhoodAccess<Node> neighbourhoodAccess = new DBAccess(graphDb, ce);
 		VariableOrdering<Node> variableOrdering = new LeastCandidates<Node>(test.getGp());
 		AltStart<Node> as = new AttrBasedStart(graphDb, ce);
-		
+
 		GPCheckerFCCBJ<Node, Entity> gpEval = new GPCheckerFCCBJ<Node, Entity>(test, ce, neighbourhoodAccess, variableOrdering, as);
-		
+
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
 		term.terminateAfter(6000l);
@@ -158,16 +158,14 @@ public class EvalTestRunner {
 		term.stop();
 
 		long time = end - start;
-		
+
 		//Print the performance time
-		System.out.print(time + ", ");
-		if (result != null){
-			System.out.print(result.size() + ", ");
-		}
+		System.out.println(time);
+
 	}
-	
+
 	public void executeSoloTestFC(GPHolder test){
-		
+
 		GPCheckerFC gpEval = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
@@ -181,12 +179,12 @@ public class EvalTestRunner {
 		term.stop();
 
 		long time = end - start;
-		
+
 		//Print the performance time
-		System.out.print(time + ", ");
-		if (result != null){
+		System.out.print(time);
+		/*if (result != null){
 			System.out.println(result.size());
-			
+
 			for (Map<MyNode, Node> res : result){
 				System.out.print("Result [");
 				for (MyNode key : res.keySet()){
@@ -194,63 +192,44 @@ public class EvalTestRunner {
 				}
 				System.out.println("]");
 			}
-		}
+		}*/
 	}
-	
+
 
 	///////////////////////////////////////////////////////
 	//													 //
 	//	Methods for running warmup cases				 //
 	//													 //
 	///////////////////////////////////////////////////////
-	
+
 	/**
 	 * Runs the warmup tests.
 	 * @param The number of warmup tests to run
 	 */
 	public void warmup(int numTests){
 
-		//Create the domains for the parameters in generation
-		int[] endSize = {5, 15};
-		int[] numMex = {0,1};
-		int[] numC = {0, 5};
-
-		//Initialize PRGN with a seed
 		Random rand = new Random(274185);
 
-		//Randomly generate the test cases, and run them
-		for (int i = 0; i < numTests; i++){
+		int[] sizes = {5, 7, 10, 9, 11, 13};
+		int[] attrs = {1, 2, 4};
+		int[] mex = {0, 1, 2};
+		int count = 1;
+		for (int i = 0; i < 250; i++){
+			int size = rand.nextInt(sizes.length);
+			int vattrs = rand.nextInt(attrs.length);
+			int eattrs = rand.nextInt(attrs.length);
+			int mexs = rand.nextInt(mex.length);
+			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, sizes[size], 1.0d, 1, mex[mexs], attrs[vattrs], attrs[eattrs]);
 
-			//Obtain the parameter values for the query gp
-			int esA = endSize[rand.nextInt(2)];
-			int nmA = numMex[rand.nextInt(2)];
-			int ncA = numC[rand.nextInt(2)];
-
-			//Obtain the parameter values for the policy gp
-			int esB = endSize[rand.nextInt(2)];
-			int nmB = numMex[rand.nextInt(2)];
-			int ncB = numC[rand.nextInt(2)];
-
-			//Generate the test case
-			EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
-			//etw.setParamsA(esA, 0.5d, 2, 0.01f, nmA, ncA, ncA);
-			etw.setParamsA(2, 0.1d, 0, 0, 1, 0);
-			etw.setParamsB(esB, 0.1d, 2, nmB, ncB, ncB);
-			TripleGPHolder test = etw.generateTests();
-
-			//Randomly decide which algorithm(s) to run.
-			//Must run at least one of the algorithms.
-			boolean twoStep = rand.nextBoolean();
-			boolean comb = true;
-			if (twoStep){
-				comb = rand.nextBoolean();
+			GPHolder gph = sg.createDBBasedGP();
+			if (gph == null){
+				i--;
+			} else {
+				executeSoloTestFCLBJ(gph);		
 			}
-
-			//Run the test case
-			executeSoloTestFCCBJ(test.combined);
 		}
 	}
-	
+
 	///////////////////////////////////////////////////////
 	//													 //
 	//	Helper Methods									 //
@@ -276,14 +255,14 @@ public class EvalTestRunner {
 
 		}
 	}
-	
-	
+
+
 	///////////////////////////////////////////////////////
 	//													 //
 	//	Methods for generating test cases				 //
 	//													 //
 	///////////////////////////////////////////////////////
-	
+
 	public int writeDiffTests(Random rand, String folder) throws Exception{
 		int count = 0;
 
@@ -328,7 +307,7 @@ public class EvalTestRunner {
 
 			//Generate 1000 cases for the profile, and add them to the list
 			for (int idx = 0; idx < 1000; idx++){
-				
+
 				int mq = numMex[rand.nextInt(numMex.length)];
 				int aq = numAttr[rand.nextInt(numAttr.length)];
 				int rq = numAttr[rand.nextInt(numAttr.length)];
@@ -337,7 +316,7 @@ public class EvalTestRunner {
 				int ap = numAttr[rand.nextInt(numAttr.length)];
 				int rp = numAttr[rand.nextInt(numAttr.length)];
 
-				
+
 				EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
 				etw.setParamsA(eq, compQ, 0, mq, aq, rq);
 				etw.setParamsB(ep, compP, 1, mp, ap, rp);
@@ -436,7 +415,7 @@ public class EvalTestRunner {
 		return count;
 	}
 
-	
+
 	///////////////////////////////////////////////////////
 	//													 //
 	//	Terminators for running test cases				 //
