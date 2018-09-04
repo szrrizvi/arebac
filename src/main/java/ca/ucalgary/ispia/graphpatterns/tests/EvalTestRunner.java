@@ -215,11 +215,11 @@ public class EvalTestRunner {
 		int[] mex = {0, 1, 2};
 		int count = 1;
 		for (int i = 0; i < 250; i++){
-			int size = rand.nextInt(sizes.length);
-			int vattrs = rand.nextInt(attrs.length);
-			int eattrs = rand.nextInt(attrs.length);
-			int mexs = rand.nextInt(mex.length);
-			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, sizes[size], 1.0d, 1, mex[mexs], attrs[vattrs], attrs[eattrs]);
+			int size = sizes[rand.nextInt(sizes.length)];
+			int vattrs = attrs[rand.nextInt(attrs.length)];
+			int eattrs = attrs[rand.nextInt(attrs.length)];
+			int mexs = mex[rand.nextInt(mex.length)];
+			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.0d, 1, mexs, vattrs, eattrs);
 
 			GPHolder gph = sg.createDBBasedGP();
 			if (gph == null){

@@ -34,10 +34,10 @@ public class Driver {
 		for (int size : sizes){
 			List<GPHolder> tests = new ArrayList<GPHolder>();
 			for (int i = 0; i < 1000; i++){
-				int vattrs = rand.nextInt(attrs.length);
-				int eattrs = rand.nextInt(attrs.length);
-				int mexs = rand.nextInt(mex.length);
-				SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.5d, 1, mex[mexs], attrs[vattrs], attrs[eattrs]);
+				int vattrs = attrs[rand.nextInt(attrs.length)];
+				int eattrs = attrs[rand.nextInt(attrs.length)];
+				int mexs = mex[rand.nextInt(mex.length)];
+				SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.5d, 1, mexs, vattrs, attrs);
 				
 				GPHolder gph = sg.createDBBasedGP();
 				if (gph == null){
