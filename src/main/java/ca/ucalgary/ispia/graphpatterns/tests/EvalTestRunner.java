@@ -76,9 +76,9 @@ public class EvalTestRunner {
 			}
 
 			for (GPHolder test : tests){
-				executeSoloTestFCLBJ(test);
+				//executeSoloTestFCLBJ(test);
 				//executeSoloTestFCCBJ(test);
-				//executeSoloTestFC(test);
+				executeSoloTestFC(test);
 			}
 		}
 	}
@@ -181,7 +181,7 @@ public class EvalTestRunner {
 		long time = end - start;
 
 		//Print the performance time
-		System.out.print(time);
+		System.out.println(time);
 		/*if (result != null){
 			System.out.println(result.size());
 
@@ -210,22 +210,26 @@ public class EvalTestRunner {
 
 		Random rand = new Random(274185);
 
-		int[] sizes = {5, 7, 10, 9, 11, 13};
+		int[] sizes = {5, 7, 9, 10, 11, 13};
 		int[] attrs = {1, 2, 4};
 		int[] mex = {0, 1, 2};
+		int[] resSizes = {1, 2, 4};
 		int count = 1;
 		for (int i = 0; i < 250; i++){
 			int size = sizes[rand.nextInt(sizes.length)];
 			int vattrs = attrs[rand.nextInt(attrs.length)];
 			int eattrs = attrs[rand.nextInt(attrs.length)];
 			int mexs = mex[rand.nextInt(mex.length)];
-			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.0d, 1, mexs, vattrs, eattrs);
+			int resSize = resSizes[rand.nextInt(resSizes.length)];
+			SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.0d, 1, mexs, vattrs, eattrs, resSize);
 
 			GPHolder gph = sg.createDBBasedGP();
 			if (gph == null){
 				i--;
-			} else {
-				executeSoloTestFCLBJ(gph);		
+			} else { 
+				//executeSoloTestFCLBJ(gph);
+				//executeSoloTestFCCBJ(gph);
+				executeSoloTestFC(gph);
 			}
 		}
 	}
@@ -255,166 +259,6 @@ public class EvalTestRunner {
 
 		}
 	}
-
-
-	///////////////////////////////////////////////////////
-	//													 //
-	//	Methods for generating test cases				 //
-	//													 //
-	///////////////////////////////////////////////////////
-
-	public int writeDiffTests(Random rand, String folder) throws Exception{
-		int count = 0;
-
-		//Initialize the domain for the parameters
-		int[] numMex = {0, 1, 2};
-		int[] numAttr = {1, 2, 4};
-
-
-		//Iterate throught the 7 profiles
-		for (int profile = 0; profile < 7; profile++){
-
-			List<TripleGPHolder> tests = new ArrayList<TripleGPHolder>();
-
-			int eq = 0, ep = 0;
-			double compQ = 0.5d, compP = 0.5d;
-
-			if (profile == 0){
-				eq = 1;
-				ep = 5;
-			} else if (profile == 1){
-				eq = 1;
-				ep = 7;
-			} else if (profile == 2){
-				eq = 1;
-				ep = 10;
-				compP = 0.25d;
-			}  else if (profile == 3){
-				eq = 5;
-				ep = 5;
-			}  else if (profile == 4){
-				eq = 5;
-				ep = 7;
-			}  else if (profile == 5){
-				eq = 7;
-				ep = 5;
-			}   else if (profile == 6){
-				eq = 7;
-				ep = 7;
-			}
-
-
-
-			//Generate 1000 cases for the profile, and add them to the list
-			for (int idx = 0; idx < 1000; idx++){
-
-				int mq = numMex[rand.nextInt(numMex.length)];
-				int aq = numAttr[rand.nextInt(numAttr.length)];
-				int rq = numAttr[rand.nextInt(numAttr.length)];
-
-				int mp = numMex[rand.nextInt(numMex.length)];
-				int ap = numAttr[rand.nextInt(numAttr.length)];
-				int rp = numAttr[rand.nextInt(numAttr.length)];
-
-
-				EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
-				etw.setParamsA(eq, compQ, 0, mq, aq, rq);
-				etw.setParamsB(ep, compP, 1, mp, ap, rp);
-
-				TripleGPHolder test = etw.generateTests();
-				tests.add(test);	
-			}
-
-			//Save the list in a new file
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(folder +"/tests" + count + ".ser"));
-			oos.writeObject(tests);
-			oos.flush();
-			oos.close();
-
-			count++;
-		}
-
-		//Return the number of files created
-		return count;
-	}
-
-
-	/**
-	 * Creates the 50 cases for each parameter combination.
-	 * Store the 50 cases as a list in a serialized file. Creates a separate
-	 * file for each parameter value combination.
-	 * @param rand The PRGN
-	 * @param folder The name of the folder to store the files in
-	 * @return The number of test files created
-	 * @throws Exception
-	 */
-	public int writeTests(Random rand, String folder) throws Exception{
-
-		int count = 0;
-		//Initialize the domain for the parameters
-		int[] endSize = {1, 5, 7, 10, 15, 20};
-		//double[] complete = {0.5d};//, 0.20d};
-		int[] numMex = {0, 5, 10};
-		int[] numAttr = {0, 5, 7};
-
-		//Iterate through the parameters (query params on top, then the policy params)
-		for (int eq = 0; eq < endSize.length; eq++){
-			for (int ep = 1; ep < endSize.length; ep++){
-
-				List<TripleGPHolder> tests = new ArrayList<TripleGPHolder>();
-
-				double cq = 0.0d;
-				int mq = 0;
-				int aq = 1;
-				if (eq > 0 && eq <= 2){
-					cq = 0.5d;
-					aq = numAttr[rand.nextInt(2)];
-				} else if (eq > 2) {
-					cq = 0.25d;
-					mq = numMex[rand.nextInt(numMex.length)];
-					aq = numAttr[rand.nextInt(numAttr.length)];
-				}
-
-				if (aq == 0){
-					aq = 1;
-				}
-
-				double cp = 0.0d;
-				int mp = 0;
-				int ap = 0;
-				if (ep <= 2){
-					cp = 0.5d;
-					ap = numAttr[rand.nextInt(2)];
-				} else if (ep > 2) {
-					cp = 0.25d;
-					mp = numMex[rand.nextInt(numMex.length)];
-					ap = numAttr[rand.nextInt(numAttr.length)];
-				}
-
-				//Generate 50 cases for the profile, and add them to the list
-				for (int idx = 0; idx < 50; idx++){
-					EvalTestGenWrapper etw = new EvalTestGenWrapper(graphDb, rand, 1);
-					etw.setParamsA(endSize[eq], cq, 0, mq, aq, aq);
-					etw.setParamsB(endSize[ep], cp, 2, mp, ap, ap);
-
-					TripleGPHolder test = etw.generateTests();
-					tests.add(test);	
-				}
-
-				//Save the list in a new file
-				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(folder +"/tests" + count + ".ser"));
-				oos.writeObject(tests);
-				oos.flush();
-				oos.close();
-
-				count++;
-			}
-		}
-
-		//Return the number of files created
-		return count;
-	}
-
 
 	///////////////////////////////////////////////////////
 	//													 //

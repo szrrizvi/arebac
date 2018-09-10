@@ -41,6 +41,8 @@ public class SubgraphGenerator {
 	private int numVAttrs;					//Number of vertex attributes required
 	private int numEAttrs;					//Number of edge attributes required
 
+	private int resSize;					//Number of variables in the result schema
+	
 	private GPHolder gpHolder;				//The resulting graph pattern holder.
 
 
@@ -55,7 +57,7 @@ public class SubgraphGenerator {
 	 * @param numMex The number of mutual exclusion constraitns
 	 * @param numAttrs The number of attribute requirements
 	 */
-	public SubgraphGenerator(GraphDatabaseService graphDb, int totalGraphNodes, Random random, int endSize, double complete,  int rooted, int numMex, int numVAttrs, int numEAttrs){
+	public SubgraphGenerator(GraphDatabaseService graphDb, int totalGraphNodes, Random random, int endSize, double complete,  int rooted, int numMex, int numVAttrs, int numEAttrs, int resSize){
 
 		//Set the graphdb and the random number generator
 		this.graphDb = graphDb;
@@ -69,6 +71,7 @@ public class SubgraphGenerator {
 		this.numMex = numMex;
 		this.numVAttrs = numVAttrs;
 		this.numEAttrs = numEAttrs;
+		this.resSize = resSize;
 
 		//initialize the lists
 		this.rels = new ArrayList<Relationship>();
@@ -140,10 +143,18 @@ public class SubgraphGenerator {
 
 		//Generate the GPHolder
 		this.gpHolder = new GPHolder(gp, mex, new HashMap<String, MyNode>());
-		//Set the result schema (single node)
-		MyNode resNode = gp.getNodes().get(random.nextInt(endSize));
+		
+		//Check if result schema size is greater than the number of nodes
+		if (resSize > gp.getNodes().size()){
+			return null;
+		}
+		
+		//Set the result schema
 		List<MyNode> resultSchema = new ArrayList<MyNode>();
-		resultSchema.add(resNode);
+		resultSchema.addAll(gp.getNodes());
+		while(resultSchema.size() > resSize){
+			resultSchema.remove(random.nextInt(resultSchema.size()));
+		}
 		this.gpHolder.setResultSchema(resultSchema);
 
 		return this.gpHolder;

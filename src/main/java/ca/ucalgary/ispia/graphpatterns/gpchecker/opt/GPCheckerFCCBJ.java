@@ -210,13 +210,10 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			Map<MyNode, N> result = new HashMap<MyNode, N>();
 
 			//Copy the nodes from the resultSchema to the result map
-			System.out.print("RESULT: [");
 			for (MyNode req : resultSchema){
 				N node = assignments.get(req);
 				result.put(req, node);
-				System.out.print("(" + req.getId() + ", " + node + "), ");
 			}
-			System.out.println("]");
 
 			//Add the result to the queryResults list. Avoid duplication
 			if (!queryResults.contains(result)){
@@ -248,13 +245,6 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
-			
-			System.out.print("Assignment: [");
-			for (MyNode key : assignments.keySet()){
-				System.out.print("("+key.getId() + ", " + assignments.get(key) + "), "); 
-			}
-			System.out.println("]<- [(" + nextNode.getId() + ", " + vertex + ")]");
-
 			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();

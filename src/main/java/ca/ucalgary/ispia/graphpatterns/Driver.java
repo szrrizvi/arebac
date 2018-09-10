@@ -1,14 +1,10 @@
 package ca.ucalgary.ispia.graphpatterns;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.List;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import ca.ucalgary.ispia.graphpatterns.graph.GPHolder;
 import ca.ucalgary.ispia.graphpatterns.tests.EvalTestRunner;
 /**
  * The driver.
@@ -27,9 +23,10 @@ public class Driver {
 		
 		
 		/*Random rand = new Random(5523397);
-		int[] sizes = {5, 7, 10, 9, 11, 13};
+		int[] sizes = {5, 7, 9, 10, 11, 13};
 		int[] attrs = {1, 2, 4};
 		int[] mex = {0, 1, 2};
+		int[] resSizes = {1, 2, 4};
 		int count = 1;
 		for (int size : sizes){
 			List<GPHolder> tests = new ArrayList<GPHolder>();
@@ -37,7 +34,8 @@ public class Driver {
 				int vattrs = attrs[rand.nextInt(attrs.length)];
 				int eattrs = attrs[rand.nextInt(attrs.length)];
 				int mexs = mex[rand.nextInt(mex.length)];
-				SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.5d, 1, mexs, vattrs, attrs);
+				int resSize = resSizes[rand.nextInt(resSizes.length)];
+				SubgraphGenerator sg = new SubgraphGenerator(graphDb, 82168, rand, size, 1.5d, 1, mexs, vattrs, eattrs, resSize);
 				
 				GPHolder gph = sg.createDBBasedGP();
 				if (gph == null){
@@ -48,7 +46,7 @@ public class Driver {
 			}
 			
 			try {
-				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("testCase-"+count+".ser"));
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("performance-tests/testCase-"+count+".ser"));
 				count++;
 				oos.writeObject(tests);
 				oos.close();
@@ -97,7 +95,7 @@ public class Driver {
 		
 		
 		graphDb.shutdown();
-	}
+	} 
 
 	/**
 	 * Initialize the graph database
