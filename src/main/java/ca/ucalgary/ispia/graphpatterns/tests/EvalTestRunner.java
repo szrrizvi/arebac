@@ -111,7 +111,7 @@ public class EvalTestRunner {
 		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(6000l);
+		term.terminateAfter(60000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();
@@ -123,7 +123,12 @@ public class EvalTestRunner {
 		long time = end - start;
 
 		//Print the performance time
-		System.out.println(time);
+		int resSize = 0;
+		if (result!= null){
+			resSize = result.size();
+		}
+		
+		System.out.println(time + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + gpEval.getMaxNeighbourhood());
 		/*if (result != null){
 			System.out.print(result.size() + ", ");
 
@@ -148,7 +153,7 @@ public class EvalTestRunner {
 
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(6000l);
+		term.terminateAfter(60000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();
@@ -160,7 +165,12 @@ public class EvalTestRunner {
 		long time = end - start;
 
 		//Print the performance time
-		System.out.println(time);
+		int resSize = 0;
+		if (result!= null){
+			resSize = result.size();
+		}
+		
+		System.out.println(time + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + gpEval.getMaxNeighbourhood());
 
 	}
 
@@ -169,7 +179,7 @@ public class EvalTestRunner {
 		GPCheckerFC gpEval = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(6000l);
+		term.terminateAfter(60000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();
@@ -181,7 +191,12 @@ public class EvalTestRunner {
 		long time = end - start;
 
 		//Print the performance time
-		System.out.println(time);
+		int resSize = 0;
+		if (result!= null){
+			resSize = result.size();
+		}
+		
+		System.out.println(time + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + 0);
 		/*if (result != null){
 			System.out.println(result.size());
 
@@ -227,9 +242,9 @@ public class EvalTestRunner {
 			if (gph == null){
 				i--;
 			} else { 
-				//executeSoloTestFCLBJ(gph);
+				executeSoloTestFCLBJ(gph);
 				//executeSoloTestFCCBJ(gph);
-				executeSoloTestFC(gph);
+				//executeSoloTestFC(gph);
 			}
 		}
 	}

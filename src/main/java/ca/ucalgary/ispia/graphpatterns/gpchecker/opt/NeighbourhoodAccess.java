@@ -27,4 +27,6 @@ public interface NeighbourhoodAccess<N> {
 	public abstract N findNode(MyNode src, Integer id);
 	
 	public abstract boolean relationshipExists (N src, N tgt, MyRelationship rel);
+	
+	public abstract int getMaxNeighbourhood();
 }

@@ -38,6 +38,18 @@ public class GPCheckerChrono implements GPChecker{
 	private int queryCount;
 	
 	
+	public int getMaxNeighbourhood(){
+		return 0;//neighbourhoodAccess.getMaxNeighbourhood();
+	}
+	
+	public int getAllRes(){
+		return 0;//this.allRes;
+	}
+	
+	public int getSearchSpace(){
+		return 0;//this.searchSpace;
+	}
+	
 	/**
 	 * Constructor to set the database.
 	 * @param graphDb The database to set

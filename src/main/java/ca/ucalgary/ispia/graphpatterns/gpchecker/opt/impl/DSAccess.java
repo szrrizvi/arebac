@@ -21,9 +21,8 @@ import ca.ucalgary.ispia.graphpatterns.graph.MyRelationship;
 public class DSAccess implements NeighbourhoodAccess<MyNode>{
 
 	private DataSetInterface dataset;
-	private Map<Integer, Integer> neighbourhoodSizes; 
+	private Map<Integer, Integer> neighbourhoodSizes;
 
-	
 
 	/**
 	 * Initilizes the instance variables.
@@ -34,6 +33,10 @@ public class DSAccess implements NeighbourhoodAccess<MyNode>{
 		//Initialize the instance variables
 		this.dataset = dataset;
 		neighbourhoodSizes = new HashMap<Integer, Integer>();
+	}
+	
+	public int getMaxNeighbourhood(){
+		return 0;
 	}
 	
 	public Map<Integer, Integer> getNeighbourhoodSizes() {

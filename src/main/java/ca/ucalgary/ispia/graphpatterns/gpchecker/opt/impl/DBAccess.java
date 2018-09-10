@@ -31,7 +31,9 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 	private final GraphDatabaseService graphDb;					//GraphDatabaseService - gives access to the database
 	private final ConstraintsEvaluator<Node, Entity> constraintsEvaluator;	//ConstraintsEvaluator - gives access to the components that ensures constraints are satisfied
 	
-	public Map<Integer, Integer> neighbourhoodSizes; 
+	//public Map<Integer, Integer> neighbourhoodSizes; 
+	
+	public int maxNeighbourhood;
 
 	/**
 	 * Initilizes the instance variables.
@@ -42,7 +44,12 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		//Initialize the instance variables
 		this.graphDb = graphDb;
 		this.constraintsEvaluator = constraintsEvaluator;
-		this.neighbourhoodSizes = new HashMap<Integer, Integer>();
+		//this.neighbourhoodSizes = new HashMap<Integer, Integer>();
+		maxNeighbourhood = 0;
+	}
+	
+	public int getMaxNeighbourhood(){
+		return this.maxNeighbourhood;
 	}
 	
 	/**
@@ -91,12 +98,15 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		}
 
 		int size = neighbours.size();
-		if (neighbourhoodSizes.containsKey(size)){
+		if (size > maxNeighbourhood){
+			maxNeighbourhood = size;
+		}
+		/*if (neighbourhoodSizes.containsKey(size)){
 			int val = neighbourhoodSizes.get(size)+1;
 			neighbourhoodSizes.put(size, val);
 		} else {
 			neighbourhoodSizes.put(size, 1);
-		}
+		}*/
 		
 		return neighbours;
 	}

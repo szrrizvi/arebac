@@ -58,8 +58,8 @@ public class Driver {
 		
 		
 		EvalTestRunner etr = new EvalTestRunner(graphDb);
-		etr.warmup(250);
-		System.out.println("Done Warmup\n"); 
+		//etr.warmup(250);
+		//System.out.println("Done Warmup\n"); 
 		etr.runGPHTestsList("performance-tests/testCase", 6);
 		
 		

@@ -37,6 +37,9 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 	private final AltStart<N> altStart;
 
 	private boolean killed;							//The kill flag.
+	
+	private int searchSpace;
+	private int allRes;
 
 	/**
 	 * Constructor to set and initialize the fields.
@@ -59,6 +62,20 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		this.variableOrdering = variableOrdering;
 		this.altStart = altStart;
 
+		searchSpace = 0;
+		allRes = 0;
+	}
+	
+	public int getMaxNeighbourhood(){
+		return neighbourhoodAccess.getMaxNeighbourhood();
+	}
+	
+	public int getAllRes(){
+		return this.allRes;
+	}
+	
+	public int getSearchSpace(){
+		return this.searchSpace;
 	}
 
 	/**
@@ -200,6 +217,8 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
 
+			allRes++;
+			
 			//Add the assignments for the queryResults list
 			List<MyNode> resultSchema = gph.getResultSchema();
 			Map<MyNode, N> result = new HashMap<MyNode, N>();
@@ -240,6 +259,7 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
+			searchSpace++;
 			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();

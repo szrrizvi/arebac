@@ -25,4 +25,10 @@ public interface GPChecker<N, E> {
 	 * @return The number of times the database has been invoked.
 	 */
 	public int getQueryCount();
+	
+	public int getMaxNeighbourhood();
+	
+	public int getAllRes();
+	
+	public int getSearchSpace();
 }
