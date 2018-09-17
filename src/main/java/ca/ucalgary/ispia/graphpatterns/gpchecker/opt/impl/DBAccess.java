@@ -120,7 +120,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		
 		try (Transaction tx = graphDb.beginTx()){
 			
-			tgt = graphDb.findNode(LabelEnum.PERSON, "id", id);
+			tgt = graphDb.findNode(LabelEnum.Person, "id", id);
 			
 			if (tgt == null){
 				//If the node is not found, return null
