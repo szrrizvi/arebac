@@ -19,7 +19,79 @@ public class Driver {
 	public static void main(String[] args){	
 		
 		Driver d = new Driver();
-		GraphDatabaseService graphDb = d.getGraphDb("slashdotNeo4j");
+		GraphDatabaseService graphDb = d.getGraphDb("simulation-tests/slashdot1riddb");
+			
+		EvalTestRunner etr = new EvalTestRunner(graphDb);
+		//etr.warmup(250);
+		//System.out.println("Done Warmup\n"); 
+		etr.runGPHTestsList("simulation-tests/slashdottests/testCase", 6);
+				
+		
+		
+		/*for (int i = 1; i <= 6; i++){
+			ObjectInputStream ois = null;
+			List<GPHolder> tests = null;
+			try {
+				ois = new ObjectInputStream(new FileInputStream("performance-tests/testCase-" + i + ".ser"));
+				tests = (List<GPHolder>) ois.readObject();
+				ois.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			
+			List<GPHolder> newTests = new ArrayList<GPHolder>();
+
+			for (GPHolder test : tests){
+				GraphPattern newGP = new GraphPattern();
+				List<MyRelationship> newRels = new ArrayList<MyRelationship>();
+				
+				List<MyNode> nodes = test.getGp().getNodes();
+				List<MyRelationship> rels = test.getGp().getAllRelationships();
+				List<MyNode> res = test.getResultSchema();
+				
+				for(MyNode node : nodes){
+					String id = null;
+					if (node.hasAttribute("id")){
+						id = node.getAttribute("id");
+					}
+					
+					Map<String, String> attrs = new HashMap<String, String>();
+					if (id != null){
+						attrs.put("id", id);
+					}
+					node.setAttributes(attrs);
+					newGP.addNode(node);
+				}
+				
+				for (MyRelationship rel : rels){
+					MyRelationship newRel = new MyRelationship(rel.getSource(), rel.getTarget(), RelType.RelA, rel.getId());
+					newRels.add(newRel);
+					newGP.addRelationship(newRel);
+				}
+				
+				List<Pair<MyNode, MyNode>> mexList = new ArrayList<Pair<MyNode, MyNode>>();
+				Map<String, MyNode> actMap = new HashMap<String, MyNode>();
+				GPHolder newGPHolder = new GPHolder(newGP, mexList, actMap);
+				newGPHolder.setResultSchema(test.getResultSchema());
+				
+				newTests.add(newGPHolder);
+				
+				System.out.println(test);
+				System.out.println(newGPHolder);
+				System.out.println("XXX");
+			}
+			
+			try {
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("simulation-tests/slashdottests/testCase-"+i+".ser"));
+				oos.writeObject(newTests);
+				oos.close();
+			} catch (Exception e){
+				e.printStackTrace();
+				return;
+			}
+		}*/
 		
 		
 		/*Random rand = new Random(5523397);
@@ -55,13 +127,6 @@ public class Driver {
 				return;
 			}
 		}*/
-		
-		
-		EvalTestRunner etr = new EvalTestRunner(graphDb);
-		//etr.warmup(250);
-		//System.out.println("Done Warmup\n"); 
-		etr.runGPHTestsList("performance-tests/testCase", 6);
-		
 		
 		/*List<GPHolder> tests = null;
 		 try {

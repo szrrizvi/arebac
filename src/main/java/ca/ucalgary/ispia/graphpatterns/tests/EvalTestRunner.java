@@ -62,7 +62,7 @@ public class EvalTestRunner {
 	 * @param numProfiles The number of files to read (starting at 1)
 	 */
 	public void runGPHTestsList(String fileNamePrefix, int numProfiles){
-		for (int i = 4; i <= numProfiles; i++){
+		for (int i = 1; i <= numProfiles; i++){
 			ObjectInputStream ois = null;
 			List<GPHolder> tests = null;
 			try {
@@ -76,9 +76,9 @@ public class EvalTestRunner {
 			}
 
 			for (GPHolder test : tests){
-				//executeSoloTestFCLBJ(test);
+				executeSoloTestFCLBJ(test);
 				//executeSoloTestFCCBJ(test);
-				executeSoloTestFC(test);
+				//executeSoloTestFC(test);
 			}
 		}
 	}
