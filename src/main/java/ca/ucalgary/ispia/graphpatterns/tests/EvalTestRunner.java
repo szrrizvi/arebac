@@ -55,6 +55,60 @@ public class EvalTestRunner {
 	//													 //
 	///////////////////////////////////////////////////////
 
+	public void runSimTests(String fileNamePrefix, Random rand){
+		
+		List<GPHolder> samples = new ArrayList<GPHolder>();
+		
+		for (int i = 4; i <= 6; i++){
+			ObjectInputStream ois = null;
+			List<GPHolder> tests = null;
+			try {
+				ois = new ObjectInputStream(new FileInputStream(fileNamePrefix +"-" + i + ".ser"));
+				tests = (List<GPHolder>) ois.readObject();
+				ois.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			
+			samples.addAll(tests);
+			
+		}
+		
+		while (samples.size()>250){
+			samples.remove(rand.nextInt(samples.size()));
+		}
+		
+		for (GPHolder test : samples){
+			executeSoloTestFCLBJ(test);
+			//executeSoloTestFCCBJ(test);
+			//executeSoloTestFC(test);
+		}
+	}
+	
+	public void runSimTests(String fileName){
+		ObjectInputStream ois = null;
+		List<GPHolder> tests = null;
+		try {
+			ois = new ObjectInputStream(new FileInputStream(fileName));
+			tests = (List<GPHolder>) ois.readObject();
+			ois.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+			
+		for (GPHolder test : tests){
+			executeSoloTestFCLBJ(test);
+			//executeSoloTestFCCBJ(test);
+			//executeSoloTestFC(test);
+		}
+		
+	}
+	
+	
 	/**
 	 * Runs the GPH Test cases.
 	 * Precondition: Each file contains a list of GPHolder objects.
@@ -115,7 +169,7 @@ public class EvalTestRunner {
 		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(60000l);
+		term.terminateAfter(300000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();

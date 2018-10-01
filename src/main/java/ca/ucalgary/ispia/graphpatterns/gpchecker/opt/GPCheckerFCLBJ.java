@@ -223,7 +223,7 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 			List<MyNode> resultSchema = gph.getResultSchema();
 			Map<MyNode, N> result = new HashMap<MyNode, N>();
 
-
+			/*
 			//Copy the nodes from the resultSchema to the result map
 			for (MyNode req : resultSchema){
 				N node = assignments.get(req);
@@ -233,7 +233,7 @@ public class GPCheckerFCLBJ<N, E> implements GPChecker<N, E>, Killable{
 			//Add the result to the queryResults list. Avoid duplication
 			if (!queryResults.contains(result)){
 				queryResults.add(result);
-			}
+			}*/
 			Set<MyNode> res = new HashSet<MyNode>();
 			res.addAll(resultSchema);
 			return res;
