@@ -113,7 +113,7 @@ public class EvalTestRunner {
 	 * Runs the GPH Test cases.
 	 * Precondition: Each file contains a list of GPHolder objects.
 	 * @param fileNamePrefix The name of the file: fileNamePrefix + "-" + i + ".ser"
-	 * @param numProfiles The number of files to read (starting at 1) 
+	 * @param numProfiles The number of files to read (starting at 1)
 	 */
 	public void runGPHTestsList(String fileNamePrefix, int numProfiles){
 
