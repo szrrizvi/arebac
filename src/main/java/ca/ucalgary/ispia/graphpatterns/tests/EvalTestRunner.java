@@ -132,7 +132,7 @@ public class EvalTestRunner {
 			
 			for (GPHolder test : tests){
 				//executeSoloTestFCLBJ(test);
-				executeSoloTestFCCBJ(test); 
+				executeSoloTestFCCBJ(test);
 				//executeSoloTestFC(test);
 			}
 		}
