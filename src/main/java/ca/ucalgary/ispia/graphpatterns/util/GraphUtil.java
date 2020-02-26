@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -25,13 +26,21 @@ public class GraphUtil {
 			while(nodes.hasNext()){
 				Node n = nodes.next();
 				
-				int deg = n.getDegree();
+				int degIn = n.getDegree(Direction.INCOMING);
+				int degOut = n.getDegree(Direction.OUTGOING);
 				
-				if (map.containsKey(deg)){
-					int val = map.get(deg) +1;
-					map.put(deg, val);
+				if (map.containsKey(degIn)){
+					int val = map.get(degIn) +1;
+					map.put(degIn, val);
 				} else {
-					map.put(deg, 1);
+					map.put(degIn, 1);
+				}
+				
+				if (map.containsKey(degOut)){
+					int val = map.get(degOut) +1;
+					map.put(degOut, val);
+				} else {
+					map.put(degOut, 1);
 				}
 			}
 			

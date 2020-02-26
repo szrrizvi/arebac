@@ -121,21 +121,18 @@ public class EvalTestRunner {
 			ObjectInputStream ois = null;
 			List<GPHolder> tests = null;
 			try {
-				ois = new ObjectInputStream(new FileInputStream(fileNamePrefix +"-" + i + ".ser"));
+				ois = new ObjectInputStream(new FileInputStream(fileNamePrefix +"-" + 8 + ".ser"));
 				tests = (List<GPHolder>) ois.readObject();
 				ois.close();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				return;
-			}
-			for (int idx = 0; idx < 225; idx++){
-				tests.remove(idx);
+				return; 
 			}
 			
 			for (GPHolder test : tests){
-				executeSoloTestFCLBJ(test);
-				//executeSoloTestFCCBJ(test);
+				//executeSoloTestFCLBJ(test);
+				executeSoloTestFCCBJ(test);
 				//executeSoloTestFC(test);
 			}
 		}
@@ -169,7 +166,7 @@ public class EvalTestRunner {
 		GPCheckerFC gpEvalB = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(300000l);
+		term.terminateAfter(6000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();
@@ -186,7 +183,7 @@ public class EvalTestRunner {
 			resSize = result.size();
 		}
 		
-		System.out.println(time + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + gpEval.getMaxNeighbourhood());
+		System.out.println(time);// + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + gpEval.getMaxNeighbourhood());
 		/*if (result != null){
 			System.out.print(result.size() + ", ");
 
@@ -211,7 +208,7 @@ public class EvalTestRunner {
 
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(60000l);
+		term.terminateAfter(6000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();
@@ -288,7 +285,7 @@ public class EvalTestRunner {
 		int[] mex = {0, 1, 2};
 		int[] resSizes = {1, 2, 4};
 		int count = 1;
-		for (int i = 0; i < 250; i++){
+		for (int i = 0; i < numTests; i++){
 			int size = sizes[rand.nextInt(sizes.length)];
 			int vattrs = attrs[rand.nextInt(attrs.length)];
 			int eattrs = attrs[rand.nextInt(attrs.length)];

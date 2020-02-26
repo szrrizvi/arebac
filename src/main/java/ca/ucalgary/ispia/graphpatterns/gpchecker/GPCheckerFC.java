@@ -240,7 +240,7 @@ public class GPCheckerFC implements GPChecker, Killable{
 						Relationship r = relIte.next();
 						Node neighbour = r.getEndNode();
 
-						if (neighbour.equals(target)){
+						if (neighbour.equals(target) && checkAttrs(rel, r)){
 							passed = true;
 						}
 					}

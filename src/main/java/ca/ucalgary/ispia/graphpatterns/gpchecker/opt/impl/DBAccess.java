@@ -97,10 +97,10 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 			tx.success();
 		}
 
-		int size = neighbours.size();
+		/*int size = neighbours.size();
 		if (size > maxNeighbourhood){
 			maxNeighbourhood = size;
-		}
+		}*/
 		/*if (neighbourhoodSizes.containsKey(size)){
 			int val = neighbourhoodSizes.get(size)+1;
 			neighbourhoodSizes.put(size, val);
@@ -120,7 +120,7 @@ public class DBAccess implements NeighbourhoodAccess<Node>{
 		
 		try (Transaction tx = graphDb.beginTx()){
 			
-			tgt = graphDb.findNode(LabelEnum.Person, "id", id);
+			tgt = graphDb.findNode(LabelEnum.PERSON, "id", id);
 			
 			if (tgt == null){
 				//If the node is not found, return null

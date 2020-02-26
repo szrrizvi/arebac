@@ -379,7 +379,8 @@ public class SubgraphGenerator {
 		try (Transaction tx = graphDb.beginTx()){
 			//Find a random node from the database, using the unique id attribute
 			int nodeId = random.nextInt(totalGraphNodes);
-			node = graphDb.findNode(LabelEnum.Person, "id" , nodeId);
+			//node = graphDb.findNode(LabelEnum.Person, "id" , nodeId);
+			node = graphDb.getNodeById(nodeId);
 			tx.success();
 		}
 		return node;
