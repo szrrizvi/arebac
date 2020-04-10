@@ -121,7 +121,7 @@ public class EvalTestRunner {
 			ObjectInputStream ois = null;
 			List<GPHolder> tests = null;
 			try {
-				ois = new ObjectInputStream(new FileInputStream(fileNamePrefix +"-" + 8 + ".ser"));
+				ois = new ObjectInputStream(new FileInputStream(fileNamePrefix +"-" + i + ".ser"));
 				tests = (List<GPHolder>) ois.readObject();
 				ois.close();
 			} catch (Exception e) {
@@ -132,8 +132,10 @@ public class EvalTestRunner {
 			
 			for (GPHolder test : tests){
 				//executeSoloTestFCLBJ(test);
-				executeSoloTestFCCBJ(test);
+				//executeSoloTestFCCBJ(test);
 				//executeSoloTestFC(test);
+				System.out.println(test);
+				System.out.println("----");
 			}
 		}
 	}
@@ -225,7 +227,7 @@ public class EvalTestRunner {
 			resSize = result.size();
 		}
 		
-		System.out.println(time + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + gpEval.getMaxNeighbourhood());
+		System.out.println(time);// + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + gpEval.getMaxNeighbourhood());
 
 	}
 
@@ -234,7 +236,7 @@ public class EvalTestRunner {
 		GPCheckerFC gpEval = new GPCheckerFC(graphDb, test);
 		//Set a 6 second kill switch
 		Terminator term = new Terminator(gpEval);
-		term.terminateAfter(60000l);
+		term.terminateAfter(6000l);
 		//Run the algorithm and record the time
 		long start = System.nanoTime();
 		List<Map<MyNode, Node>> result = gpEval.check();
@@ -251,7 +253,7 @@ public class EvalTestRunner {
 			resSize = result.size();
 		}
 		
-		System.out.println(time + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + 0);
+		System.out.println(time);// + ", " + resSize + ", " + gpEval.getAllRes() + ", " + gpEval.getSearchSpace() + ", " + 0);
 		/*if (result != null){
 			System.out.println(result.size());
 

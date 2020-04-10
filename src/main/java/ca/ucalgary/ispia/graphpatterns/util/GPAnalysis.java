@@ -37,8 +37,8 @@ public class GPAnalysis {
 				return;
 			}
 		}
-		//analyzeAvgDegree(tests);
-		analyzeDiameter(tests);
+		analyzeAvgDegree(tests);
+		//analyzeDiameter(tests);
 		
 	}
 	
@@ -59,10 +59,7 @@ public class GPAnalysis {
 			} else {
 				avgDegree.put(degreeVal, 1);
 			}
-		}
-		
-		for (Float key : avgDegree.keySet()){
-			System.out.println(key + " " + avgDegree.get(key));
+			System.out.println(degreeVal);
 		}
 	}
 	
@@ -75,7 +72,7 @@ public class GPAnalysis {
 				if (node.hasAttribute("id")){
 					Map<MyNode, Integer> distances = dijkstra(test.getGp(), node);
 					int max = Collections.max(distances.values());
-					
+					System.out.println(max);
 					if (diameters.containsKey(max)){
 						int val = diameters.get(max) + 1;
 						diameters.put(max, val);
@@ -88,9 +85,9 @@ public class GPAnalysis {
 			}
 		}
 		
-		for (Integer key : diameters.keySet()){
+		/*for (Integer key : diameters.keySet()){
 			System.out.println(key + " " + diameters.get(key));
-		}
+		}*/
 	}
 	
 	private static Map<MyNode, Integer> dijkstra(GraphPattern gp, MyNode startNode){

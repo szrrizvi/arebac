@@ -385,7 +385,7 @@ public class GPCheckerFC implements GPChecker, Killable{
 
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
-			allRes++;
+			//allRes++;
 			//Add the assignments for the queryResults list
 			List<MyNode> resultSchema = gph.getResultSchema();
 			Map<MyNode, Node> result = new HashMap<MyNode, Node>();
@@ -412,7 +412,7 @@ public class GPCheckerFC implements GPChecker, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours).
 		for(Node vertex : candidates.get(nextNode)){
-			searchSpace++;
+			//searchSpace++;
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<Node>> candsClone = new HashMap<MyNode, Set<Node>>();
 			for (MyNode key : candidates.keySet()){
@@ -570,6 +570,7 @@ public class GPCheckerFC implements GPChecker, Killable{
 	 */
 	public void kill(){
 		this.killed = true;
+		System.out.print("KILLED ");
 	}
 
 	private boolean checkAttrs(HasAttributes source, Entity target){

@@ -219,7 +219,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 
 		//If we have assigned every node, then we are done with this result set!
 		if (gp.getNodes().size() == assignments.keySet().size()){
-			allRes++;
+			//allRes++;
 			count++;
 
 			//Add the assignments for the queryResults list
@@ -233,9 +233,9 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 			}
 
 			//Add the result to the queryResults list. Avoid duplication
-			if (!queryResults.contains(result)){
+			/*if (!queryResults.contains(result)){
 				queryResults.add(result);
-			}
+			}*/
 
 			return new HashSet<MyNode>();
 		}
@@ -262,7 +262,7 @@ public class GPCheckerFCCBJ<N, E> implements GPChecker<N, E>, Killable{
 		//According to our algorithm, each candidate for nextNode satisfies all of the constraints
 		//(i.e. the relationships with its already assigned neighbours and attribute requirements).
 		for(N vertex : candidates.get(nextNode)){
-			searchSpace++;
+			//searchSpace++;
 			
 			//Clone the candidates and assignments map
 			Map<MyNode, Set<N>> candsClone = new HashMap<MyNode, Set<N>>();
